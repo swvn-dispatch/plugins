@@ -32,6 +32,7 @@ jobs:
         id: build
         env:
           REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         run: python3 .github/scripts/build_combined_manifest.py
 
       - name: Push to manifest branch
