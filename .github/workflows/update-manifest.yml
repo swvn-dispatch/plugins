@@ -1,0 +1,71 @@
+name: Update Combined Manifest
+
+# Rebuilds the aggregated plugin manifest by fetching each plugin repo's
+# manifest branch and merging all plugin entries into one root manifest.
+#
+# Runs on a schedule and can be triggered manually or via repository_dispatch
+# (fired by each plugin repo after they publish an update).
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # every 6 hours
+  workflow_dispatch:
+  repository_dispatch:
+    types: [plugin-updated]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-manifest
+  cancel-in-progress: true
+
+jobs:
+  update-manifest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build combined manifest
+        id: build
+        env:
+          REPO: ${{ github.repository }}
+        run: python3 .github/scripts/build_combined_manifest.py
+
+      - name: Push to manifest branch
+        if: steps.build.outputs.has_plugins == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code origin manifest &>/dev/null; then
+            git fetch origin manifest
+            git worktree add _manifest_wt origin/manifest
+          else
+            git worktree add --orphan -b manifest _manifest_wt
+          fi
+
+          # Root manifest
+          cp _manifest_out/manifest.json _manifest_wt/manifest.json
+
+          # Per-plugin manifests and logos
+          for plugin_dir in _manifest_out/plugins/*/; do
+            slug=$(basename "$plugin_dir")
+            dest="_manifest_wt/plugins/$slug"
+            mkdir -p "$dest"
+            cp "$plugin_dir/manifest.json" "$dest/manifest.json"
+            if [ -f "$plugin_dir/logo.png" ]; then
+              cp "$plugin_dir/logo.png" "$dest/logo.png"
+            fi
+          done
+
+          cd _manifest_wt
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Manifest unchanged – nothing to commit."
+          else
+            git commit -m "chore: update combined manifest [skip ci]"
+            git push origin HEAD:manifest
+          fi

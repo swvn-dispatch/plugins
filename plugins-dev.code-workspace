@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "sethwv-plugins-dev",
+			"path": "."
+		},
+		{
+			"name": "emby-stream-cleanup",
+			"path": "../emby-stream-cleanup"
+		},
+		{
+			"name": "dispatcharr-exporter",
+			"path": "../dispatcharr-exporter"
+		},
+		{
+			"name": "Dispatcharr",
+			"path": "../plugin-repo-work/Dispatcharr"
+		}
+	],
+	"settings": {}
+}

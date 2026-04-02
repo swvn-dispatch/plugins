@@ -1,0 +1,14 @@
+[
+  {
+    "repo": "sethwv/dispatcharr-exporter",
+    "plugin_json": "src/plugin.json",
+    "logo": "src/logo.png",
+    "dev_tag": "dev-latest"
+  },
+  {
+    "repo": "sethwv/emby-stream-cleanup",
+    "plugin_json": "src/plugin.json",
+    "logo": "src/logo.png",
+    "dev_tag": "dev-latest"
+  }
+]
