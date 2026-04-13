@@ -15,6 +15,9 @@
 		{
 			"name": "Dispatcharr",
 			"path": "../plugin-repo-work/Dispatcharr"
+		},
+		{
+			"path": "../dispatcharr-ldap"
 		}
 	],
 	"settings": {

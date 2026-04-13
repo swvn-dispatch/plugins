@@ -10,5 +10,11 @@
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
     "dev_tag": "dev-latest"
+  },
+  {
+    "repo": "sethwv/disp-ldap",
+    "plugin_json": "src/plugin.json",
+    "logo": "src/logo.png",
+    "dev_tag": "dev-latest"
   }
 ]
