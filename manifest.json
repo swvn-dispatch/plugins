@@ -20,13 +20,13 @@
       "help_url": "https://github.com/sethwv/dispatcharr-exporter"
     },
     {
-      "slug": "emby_stream_cleanup",
-      "name": "Emby Stream Cleanup",
-      "description": "Monitors Dispatcharr client activity and terminates idle Emby connections",
+      "slug": "embyfin_stream_cleanup",
+      "name": "Embyfin Stream Cleanup",
+      "description": "Monitors Dispatcharr client activity and terminates idle Emby/Jellyfin connections",
       "author": "sethwv",
       "license": "MIT",
-      "manifest_url": "plugins/emby_stream_cleanup/manifest.json",
-      "icon_url": "plugins/emby_stream_cleanup/logo.png",
+      "manifest_url": "plugins/embyfin_stream_cleanup/manifest.json",
+      "icon_url": "plugins/embyfin_stream_cleanup/logo.png",
       "help_url": "https://github.com/sethwv/emby-stream-cleanup"
     },
     {
