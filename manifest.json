@@ -1,0 +1,43 @@
+{
+  "registry_name": "sethwv/dev-plugins",
+  "registry_url": "https://github.com/sethwv/my-plugins",
+  "root_url": "https://raw.githubusercontent.com/sethwv/my-plugins/manifest",
+  "plugins": [
+    {
+      "slug": "dispatcharr_exporter",
+      "name": "Dispatcharr Exporter",
+      "description": "Expose Dispatcharr metrics in Prometheus exporter-compatible format for monitoring",
+      "author": "sethwv",
+      "license": "MIT",
+      "latest_version": "2.4.2",
+      "last_updated": "2026-03-30T19:00:59Z",
+      "manifest_url": "plugins/dispatcharr_exporter/manifest.json",
+      "latest_url": "https://github.com/sethwv/dispatcharr-exporter/releases/download/v2.4.2/dispatcharr-exporter-2.4.2.zip",
+      "latest_sha256": "0507f1cec783615aae6694b62cfb268b81f08965e9b5750f92ad155fae12c07d",
+      "icon_url": "plugins/dispatcharr_exporter/logo.png",
+      "min_dispatcharr_version": "v0.19.0",
+      "discord_thread": "https://discord.com/channels/1340492560220684331/1451260201775923421",
+      "help_url": "https://github.com/sethwv/dispatcharr-exporter"
+    },
+    {
+      "slug": "emby_stream_cleanup",
+      "name": "Emby Stream Cleanup",
+      "description": "Monitors Dispatcharr client activity and terminates idle Emby connections",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/emby_stream_cleanup/manifest.json",
+      "icon_url": "plugins/emby_stream_cleanup/logo.png",
+      "help_url": "https://github.com/sethwv/emby-stream-cleanup"
+    },
+    {
+      "slug": "ldap_auth",
+      "name": "LDAP Auth",
+      "description": "LDAP/Active Directory authentication for UI login and XC endpoints",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/ldap_auth/manifest.json",
+      "icon_url": "plugins/ldap_auth/logo.png",
+      "help_url": "https://github.com/sethwv/dispatcharr-ldap"
+    }
+  ]
+}
