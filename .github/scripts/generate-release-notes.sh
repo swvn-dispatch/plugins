@@ -47,58 +47,77 @@ echo "Comparing $OLD_TAG ... $NEW_TAG"
 # ---------------------------------------------------------------------------
 # 2. Fetch the diff - smart file prioritisation
 # ---------------------------------------------------------------------------
-# Get the list of changed files with their patches
-COMPARE=$(gh api "repos/$REPO/compare/${OLD_TAG}...${NEW_TAG}" 2>/dev/null || true)
+RAW_DIFF=$(gh api \
+  -H "Accept: application/vnd.github.diff" \
+  "repos/$REPO/compare/${OLD_TAG}...${NEW_TAG}" \
+  2>/dev/null || true)
 
-if [ -z "$COMPARE" ]; then
-  echo "::warning::Could not fetch compare data. Using fallback release notes."
+if [ -z "$RAW_DIFF" ]; then
+  echo "::warning::Could not fetch diff. Using fallback release notes."
   DIFF="(diff unavailable)"
 else
-  # Sort files by signal value (docs/config first, then .py, then rest)
-  # Skip lock files, generated files, binaries
-  # Base64-encode patches so newlines don't break the while-read loop
-  PRIORITY_FILES=$(echo "$COMPARE" | jq -r '
-    [.files[]
-      | select(.filename | test("\\.(lock|min\\.js|map|png|jpg|gif|svg|ico|woff|ttf|eot)$|package-lock|yarn\\.lock|poetry\\.lock|__pycache__|\\.pyc") | not)
-      | select(.patch != null)
-      | {
-          p: (if (.filename | test("plugin\\.json|CHANGELOG|README|HIGHLIGHTS|METRICS|\\.md$")) then 0
-              elif (.filename | test("\\.py$") and (.filename | test("__init__|migration") | not)) then 1
-              else 2 end),
-          f: .filename,
-          c: (.patch | @base64)
-        }
-    ]
-    | sort_by(.p)
-    | .[]
-    | "\(.f)\t\(.c)"
-  ' 2>/dev/null || true)
+  echo "::notice::Raw diff size: ${#RAW_DIFF} bytes. Prioritising files..."
 
-  MAX_DIFF_BYTES=14000
-  DIFF=""
-  INCLUDED=0
-  SKIPPED=0
+  # Write a small Python script to split the diff by file, sort by signal
+  # value, and fill a byte budget — avoids issues with large diffs where
+  # the JSON compare API strips per-file patches.
+  cat > /tmp/prioritize_diff.py << 'PYEOF'
+import sys, re
 
-  while IFS=$'\t' read -r FILENAME PATCH_B64; do
-    [ -z "$FILENAME" ] && continue
-    PATCH=$(echo "$PATCH_B64" | base64 -d 2>/dev/null || true)
-    [ -z "$PATCH" ] && continue
+raw = sys.stdin.read()
 
-    CANDIDATE="${DIFF}diff --git a/${FILENAME} b/${FILENAME}
-${PATCH}
-"
-    if (( ${#CANDIDATE} <= MAX_DIFF_BYTES )); then
-      DIFF="$CANDIDATE"
-      INCLUDED=$(( INCLUDED + 1 ))
-    else
-      SKIPPED=$(( SKIPPED + 1 ))
-    fi
-  done <<< "$PRIORITY_FILES"
+# Split into per-file sections on each "diff --git" header
+sections = re.split(r'(?=^diff --git )', raw, flags=re.MULTILINE)
 
-  echo "::notice::Diff: $INCLUDED files included, $SKIPPED skipped (budget: ${MAX_DIFF_BYTES} bytes, used: ${#DIFF} bytes)."
+def priority(section):
+    m = re.match(r'diff --git a/(\S+)', section)
+    if not m:
+        return 99
+    f = m.group(1)
+    # Skip noise entirely
+    if re.search(r'\.(lock|min\.js|map|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|pyc)$'
+                 r'|package-lock|yarn\.lock|poetry\.lock|__pycache__', f):
+        return 99
+    # High-signal: manifests, changelogs, docs
+    if re.search(r'plugin\.json|CHANGELOG|README|HIGHLIGHTS|METRICS|\.md$', f, re.IGNORECASE):
+        return 0
+    # Medium-signal: Python source (not boilerplate)
+    if re.search(r'\.py$', f) and not re.search(r'__init__|migration', f):
+        return 1
+    return 2
+
+sections.sort(key=priority)
+
+budget = int(sys.argv[1]) if len(sys.argv) > 1 else 14000
+result = []
+used = 0
+included = 0
+skipped = 0
+
+for s in sections:
+    if not s.strip():
+        continue
+    p = priority(s)
+    if p == 99:
+        continue
+    if used + len(s) <= budget:
+        result.append(s)
+        used += len(s)
+        included += 1
+    else:
+        skipped += 1
+
+print(''.join(result), end='', file=sys.stdout)
+sys.stderr.write(f"Diff: {included} files included, {skipped} skipped "
+                 f"(budget: {budget} bytes, used: {used} bytes).\n")
+PYEOF
+
+  DIFF=$(echo "$RAW_DIFF" | python3 /tmp/prioritize_diff.py 14000 2>/tmp/diff_stats.txt)
+  DIFF_STATS=$(cat /tmp/diff_stats.txt)
+  echo "::notice::${DIFF_STATS}"
 
   if [ -z "$DIFF" ]; then
-    echo "::warning::No diff content available. Using fallback."
+    echo "::warning::No diff content after prioritisation. Using fallback."
     DIFF="(diff unavailable)"
   fi
 fi
