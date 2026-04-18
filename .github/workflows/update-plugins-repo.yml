@@ -190,12 +190,12 @@ jobs:
         id: notes
         if: steps.check.outputs.skip == 'false'
         env:
-          REPO: ${{ steps.source.outputs.repo }}
-          TAG: ${{ steps.release.outputs.tag }}
           VERSION: ${{ steps.release.outputs.version }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
-          SETH_PAT: ${{ secrets.SETH_PAT }}
-        run: bash .github/scripts/generate-release-notes.sh
+        run: |
+          mkdir -p /tmp/release-notes
+          printf 'See the full changelog at %s\n' "$RELEASE_URL" > /tmp/release-notes/HIGHLIGHTS.md
+          printf 'v%s: Update to v%s\n\nSee release notes: %s\n' "$VERSION" "$VERSION" "$RELEASE_URL" > /tmp/release-notes/PR.md
 
       - name: Fork and clone Plugins repo
         id: fork
