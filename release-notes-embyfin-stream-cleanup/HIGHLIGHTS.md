@@ -1,0 +1,6 @@
+- Dispatcharr plugin that automatically cleans up stale Emby/Jellyfin connections
+- Terminates idle connections and orphaned sessions that are no longer playing on the media server
+- Supports multiple media servers with per-server identifiers (IP, hostname, or XC username)
+- Timers pause automatically during stream failover and buffering
+- Optional debug dashboard for monitoring active channels, matched clients, and recent terminations
+- Requires Dispatcharr v0.22.0 or later
