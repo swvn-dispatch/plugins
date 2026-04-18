@@ -58,7 +58,7 @@ if [ -z "$DIFF" ]; then
 fi
 
 # Truncate to ~100 KB to stay within model context limits
-MAX_DIFF_BYTES=102400
+MAX_DIFF_BYTES=16000
 DIFF_BYTES=${#DIFF}
 if (( DIFF_BYTES > MAX_DIFF_BYTES )); then
   echo "::notice::Diff is ${DIFF_BYTES} bytes; truncating to ${MAX_DIFF_BYTES} bytes."
