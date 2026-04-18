@@ -58,16 +58,13 @@ jobs:
           fi
 
           PLUGIN_JSON_PATH=$(echo "$ENTRY" | jq -r '.plugin_json')
-          LOGO_PATH=$(echo "$ENTRY" | jq -r '.logo // empty')
-
           # Derive slug from plugin.json name field:
           #   "Embyfin Stream Cleanup" -> embyfin-stream-cleanup
           PLUGIN_JSON=$(gh api "repos/$REPO/contents/$PLUGIN_JSON_PATH" --jq '.content' | base64 -d)
           PLUGIN_NAME=$(echo "$PLUGIN_JSON" | jq -r '.name')
           SLUG=$(echo "$PLUGIN_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
 
-          echo "slug=$SLUG"           >> "$GITHUB_OUTPUT"
-          echo "logo_path=$LOGO_PATH" >> "$GITHUB_OUTPUT"
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
 
       - name: Get latest stable release
         id: release
@@ -166,23 +163,6 @@ jobs:
           CONTENT_DIR=$(dirname "$PLUGIN_JSON")
           echo "content_dir=$CONTENT_DIR" >> "$GITHUB_OUTPUT"
 
-      - name: Download logo
-        id: logo
-        if: steps.check.outputs.skip == 'false' && steps.config.outputs.logo_path != ''
-        env:
-          REPO: ${{ steps.source.outputs.repo }}
-          TAG: ${{ steps.release.outputs.tag }}
-          LOGO_PATH: ${{ steps.config.outputs.logo_path }}
-        run: |
-          LOGO_RESPONSE=$(gh api "repos/$REPO/contents/$LOGO_PATH?ref=$TAG" 2>/dev/null || echo "MISSING")
-          if [ "$LOGO_RESPONSE" = "MISSING" ] || echo "$LOGO_RESPONSE" | jq -e '.message' > /dev/null 2>&1; then
-            echo "::warning::Logo not found at '$LOGO_PATH' for tag '$TAG'. Skipping logo."
-            echo "has_logo=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "$LOGO_RESPONSE" | jq -r '.content' | base64 -d > /tmp/logo.png
-            echo "has_logo=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Generate release notes
         id: notes
         if: steps.check.outputs.skip == 'false'
@@ -224,17 +204,12 @@ jobs:
         env:
           SLUG: ${{ steps.config.outputs.slug }}
           CONTENT_DIR: ${{ steps.extract.outputs.content_dir }}
-          HAS_LOGO: ${{ steps.logo.outputs.has_logo }}
         run: |
           cd "${{ steps.fork.outputs.repo_dir }}"
 
           rm -rf "plugins/$SLUG"
           mkdir -p "plugins/$SLUG"
           cp -r "$CONTENT_DIR"/. "plugins/$SLUG/"
-
-          if [ "$HAS_LOGO" = "true" ]; then
-            cp /tmp/logo.png "plugins/$SLUG/logo.png"
-          fi
 
           git add "plugins/$SLUG"
 
