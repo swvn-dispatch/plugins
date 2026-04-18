@@ -45,7 +45,7 @@ fi
 echo "Comparing $OLD_TAG ... $NEW_TAG"
 
 # ---------------------------------------------------------------------------
-# 2. Fetch the diff - smart file prioritisation
+# 2. Fetch and split the diff by file
 # ---------------------------------------------------------------------------
 RAW_DIFF=$(gh api \
   -H "Accept: application/vnd.github.diff" \
@@ -54,151 +54,164 @@ RAW_DIFF=$(gh api \
 
 if [ -z "$RAW_DIFF" ]; then
   echo "::warning::Could not fetch diff. Using fallback release notes."
-  DIFF="(diff unavailable)"
-else
-  echo "::notice::Raw diff size: ${#RAW_DIFF} bytes. Prioritising files..."
+  RAW_DIFF=""
+fi
 
-  # Write a small Python script to split the diff by file, sort by signal
-  # value, and fill a byte budget — avoids issues with large diffs where
-  # the JSON compare API strips per-file patches.
-  cat > /tmp/prioritize_diff.py << 'PYEOF'
-import sys, re
+echo "::notice::Raw diff size: ${#RAW_DIFF} bytes."
+
+# Use Python to split into per-file chunks, sorted by priority
+cat > /tmp/split_diff.py << 'PYEOF'
+import sys, re, json
 
 raw = sys.stdin.read()
-
-# Split into per-file sections on each "diff --git" header
 sections = re.split(r'(?=^diff --git )', raw, flags=re.MULTILINE)
 
-def priority(section):
-    m = re.match(r'diff --git a/(\S+)', section)
-    if not m:
-        return 99
-    f = m.group(1)
-    # Skip noise entirely
-    if re.search(r'\.(lock|min\.js|map|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|pyc)$'
-                 r'|package-lock|yarn\.lock|poetry\.lock|__pycache__', f):
-        return 99
-    # High-signal: manifests, changelogs, docs
-    if re.search(r'plugin\.json|CHANGELOG|README|HIGHLIGHTS|METRICS|\.md$', f, re.IGNORECASE):
-        return 0
-    # Medium-signal: Python source (not boilerplate)
-    if re.search(r'\.py$', f) and not re.search(r'__init__|migration', f):
-        return 1
-    return 2
+SKIP = re.compile(
+    r'\.(lock|min\.js|map|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|pyc)$'
+    r'|package-lock|yarn\.lock|poetry\.lock|__pycache__'
+)
+HIGH  = re.compile(r'plugin\.json|CHANGELOG|\.md$', re.IGNORECASE)
+MED   = re.compile(r'\.py$')
+SKIP_MED = re.compile(r'__init__|migration')
 
-sections.sort(key=priority)
-
-budget = int(sys.argv[1]) if len(sys.argv) > 1 else 14000
-result = []
-used = 0
-included = 0
-skipped = 0
-
+out = []
 for s in sections:
-    if not s.strip():
+    m = re.match(r'diff --git a/(\S+)', s)
+    if not m or not s.strip():
         continue
-    p = priority(s)
-    if p == 99:
+    f = m.group(1)
+    if SKIP.search(f):
         continue
-    if used + len(s) <= budget:
-        result.append(s)
-        used += len(s)
-        included += 1
+    if HIGH.search(f):
+        p = 0
+    elif MED.search(f) and not SKIP_MED.search(f):
+        p = 1
     else:
-        skipped += 1
+        p = 2
+    out.append({"p": p, "f": f, "patch": s.strip()})
 
-print(''.join(result), end='', file=sys.stdout)
-sys.stderr.write(f"Diff: {included} files included, {skipped} skipped "
-                 f"(budget: {budget} bytes, used: {used} bytes).\n")
+out.sort(key=lambda x: x["p"])
+json.dump(out, sys.stdout)
 PYEOF
 
-  DIFF=$(echo "$RAW_DIFF" | python3 /tmp/prioritize_diff.py 14000 2>/tmp/diff_stats.txt)
-  DIFF_STATS=$(cat /tmp/diff_stats.txt)
-  echo "::notice::${DIFF_STATS}"
+FILE_SECTIONS=$(echo "$RAW_DIFF" | python3 /tmp/split_diff.py 2>/dev/null || echo "[]")
+FILE_COUNT=$(echo "$FILE_SECTIONS" | jq 'length')
+echo "::notice::${FILE_COUNT} relevant files to process."
 
-  if [ -z "$DIFF" ]; then
-    echo "::warning::No diff content after prioritisation. Using fallback."
-    DIFF="(diff unavailable)"
+# ---------------------------------------------------------------------------
+# 3. Helper: call GitHub Models API
+# ---------------------------------------------------------------------------
+call_model() {
+  local system_msg="$1"
+  local user_msg="$2"
+  local max_tokens="${3:-800}"
+
+  local body
+  body=$(jq -n \
+    --arg s "$system_msg" \
+    --arg u "$user_msg" \
+    --argjson t "$max_tokens" \
+    '{model:"gpt-4o", messages:[{role:"system",content:$s},{role:"user",content:$u}],
+      response_format:{type:"json_object"}, max_tokens: $t}')
+
+  local resp
+  resp=$(curl -s -w "\n__STATUS__:%{http_code}" \
+    -H "Authorization: Bearer $SETH_PAT" \
+    -H "Content-Type: application/json" \
+    -d "$body" \
+    "https://models.inference.ai.azure.com/chat/completions")
+
+  local status content
+  status=$(echo "$resp" | tail -1 | sed 's/__STATUS__://')
+  resp=$(echo "$resp" | sed '$d')
+
+  if [ "$status" != "200" ]; then
+    echo "::warning::Models API returned HTTP $status: $(echo "$resp" | jq -r '.error.message // empty' 2>/dev/null)" >&2
+    echo ""
+    return
   fi
+
+  echo "$resp" | jq -r '.choices[0].message.content // empty' 2>/dev/null || true
+}
+
+# ---------------------------------------------------------------------------
+# 4. Phase 1 — per-file summaries (non-doc files first, up to 6 files)
+# ---------------------------------------------------------------------------
+FILE_SYSTEM="You are a concise changelog assistant. Given a git diff for a single file, \
+return a JSON object with one field: \"summary\" — a single sentence describing what \
+changed from a user perspective. Focus on behaviour, new features, or bug fixes. \
+Ignore formatting/comment-only changes. If nothing user-facing changed, set summary to null."
+
+MAX_FILE_CALLS=6
+MAX_PATCH_BYTES=6000
+
+SUMMARIES=""
+CALLS=0
+
+# Process non-doc files first (p=1,2), then docs (p=0) if budget remains
+for PRIORITY in 1 2 0; do
+  while IFS= read -r entry; do
+    [ -z "$entry" ] && continue
+    [ "$CALLS" -ge "$MAX_FILE_CALLS" ] && break 2
+
+    FNAME=$(echo "$entry" | jq -r '.f')
+    PATCH=$(echo "$entry" | jq -r '.patch')
+
+    # Truncate patch if needed
+    if (( ${#PATCH} > MAX_PATCH_BYTES )); then
+      PATCH="${PATCH:0:$MAX_PATCH_BYTES}
+... (truncated)"
+    fi
+
+    echo "  Summarising $FNAME..."
+    RESULT=$(call_model "$FILE_SYSTEM" "File: ${FNAME}
+
+${PATCH}" 150)
+
+    SUMMARY=$(echo "$RESULT" | jq -r '.summary // empty' 2>/dev/null || true)
+    if [ -n "$SUMMARY" ] && [ "$SUMMARY" != "null" ]; then
+      SUMMARIES="${SUMMARIES}- **${FNAME}**: ${SUMMARY}
+"
+      CALLS=$(( CALLS + 1 ))
+    fi
+  done < <(echo "$FILE_SECTIONS" | jq -c --argjson p "$PRIORITY" '.[] | select(.p == $p)')
+done
+
+echo "::notice::Per-file summaries complete ($CALLS files summarised)."
+
+if [ -z "$SUMMARIES" ]; then
+  echo "::warning::No file summaries generated. Using fallback."
+  SUMMARIES="(no diff summary available)"
 fi
 
 # ---------------------------------------------------------------------------
-# 3. Read and adapt the Changelog agent prompt (strip YAML frontmatter)
+# 5. Phase 2 — aggregate summaries into final release notes
 # ---------------------------------------------------------------------------
+echo "Calling GitHub Models API (aggregation)..."
+
 AGENT_PROMPT=$(sed '/^---$/,/^---$/d' .github/scripts/Changelog.agent.md | sed '/^$/{ N; /^\n$/d; }')
 
-SYSTEM_PROMPT="${AGENT_PROMPT}
+AGG_SYSTEM="${AGENT_PROMPT}
 
 IMPORTANT - CI OUTPUT FORMAT:
-You are running in a CI environment, not an interactive editor. Do NOT create files.
-Instead, return a JSON object with exactly these three fields:
-  - \"highlights\": bullet-point list (each line starts with \"- \"), user-facing features only
-  - \"pr_title\": a short imperative description of the changes (no version prefix, no square brackets, no plugin name)
-  - \"pr_body\": a single paragraph describing what changed and why
+You are running in a CI environment. Do NOT create files.
+Return a JSON object with exactly these three fields:
+  - \"highlights\": bullet-point list (each line starts with \"- \"), user-facing changes only, max 6 bullets
+  - \"pr_title\": short imperative phrase under 60 chars (no version prefix, no plugin name, no square brackets)
+  - \"pr_body\": one paragraph describing what changed and why
 
-The commit message subject will be formatted as \"v{VERSION}: {pr_title}\", for example:
-  \"v3.0.0: Add user metrics and remove legacy stream labels\"
+The commit subject will be \"v{VERSION}: {pr_title}\", e.g.:
+  \"v3.0.0: Unify live and VOD stream metrics\"
   \"v1.0.0: Initial release\"
-So pr_title should complete that sentence naturally and be under 60 characters.
-
-Example response:
-{
-  \"highlights\": \"- Added X\\n- Fixed Y\",
-  \"pr_title\": \"Add user metrics and remove legacy stream labels\",
-  \"pr_body\": \"Adds opt-in user metrics and removes all legacy formats. Minimum Dispatcharr version raised to v0.22.0.\"
-}
 
 Do not include any text outside the JSON object."
 
-USER_MESSAGE="Generate release notes for version ${VERSION} of the plugin at ${REPO}.
+AGG_USER="Summarise release v${VERSION} of ${REPO} (${OLD_TAG} → ${NEW_TAG}).
 
-Diff (${OLD_TAG} to ${NEW_TAG}):
+Per-file change summaries:
+${SUMMARIES}"
 
-${DIFF}"
-
-# ---------------------------------------------------------------------------
-# 4. Call GitHub Models API
-# ---------------------------------------------------------------------------
-echo "Calling GitHub Models API..."
-
-REQUEST_BODY=$(jq -n \
-  --arg system "$SYSTEM_PROMPT" \
-  --arg user "$USER_MESSAGE" \
-  '{
-    model: "gpt-4o",
-    messages: [
-      {role: "system", content: $system},
-      {role: "user",   content: $user}
-    ],
-    response_format: {type: "json_object"}
-  }')
-
-HTTP_STATUS=""
-API_RESPONSE=$(curl -s -w "\n__HTTP_STATUS__:%{http_code}" \
-  -H "Authorization: Bearer $SETH_PAT" \
-  -H "Content-Type: application/json" \
-  -d "$REQUEST_BODY" \
-  "https://models.inference.ai.azure.com/chat/completions")
-
-# Split status code from body
-HTTP_STATUS=$(echo "$API_RESPONSE" | tail -1 | sed 's/__HTTP_STATUS__://')
-API_RESPONSE=$(echo "$API_RESPONSE" | sed '$d')
-
-echo "GitHub Models API HTTP status: $HTTP_STATUS"
-
-if [ -z "$API_RESPONSE" ]; then
-  echo "::warning::GitHub Models API returned empty response (HTTP $HTTP_STATUS). Using fallback."
-elif echo "$API_RESPONSE" | jq -e '.error' > /dev/null 2>&1; then
-  ERROR_MSG=$(echo "$API_RESPONSE" | jq -r '.error.message // .error // "unknown error"')
-  echo "::warning::GitHub Models API error (HTTP $HTTP_STATUS): $ERROR_MSG. Using fallback."
-  API_RESPONSE=""
-elif [ "$HTTP_STATUS" != "200" ]; then
-  echo "::warning::GitHub Models API returned HTTP $HTTP_STATUS. Response: $(echo "$API_RESPONSE" | head -c 500). Using fallback."
-  API_RESPONSE=""
-fi
-
-# Parse the content field from the chat completion response
-CONTENT=$(echo "$API_RESPONSE" | jq -r '.choices[0].message.content // empty' 2>/dev/null || true)
+CONTENT=$(call_model "$AGG_SYSTEM" "$AGG_USER" 600)
 
 if [ -z "$CONTENT" ]; then
   echo "::warning::Could not parse model response. Using fallback release notes."
@@ -214,7 +227,7 @@ EOF
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Extract fields and write output files
+# 6. Extract fields and write output files
 # ---------------------------------------------------------------------------
 HIGHLIGHTS=$(echo "$CONTENT" | jq -r '.highlights // empty')
 PR_TITLE=$(echo "$CONTENT"   | jq -r '.pr_title   // empty')
