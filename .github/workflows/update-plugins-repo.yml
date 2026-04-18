@@ -192,7 +192,7 @@ jobs:
         run: |
           mkdir -p /tmp/release-notes
           printf 'See the full changelog at %s\n' "$RELEASE_URL" > /tmp/release-notes/HIGHLIGHTS.md
-          printf 'v%s: Update to v%s\n\nSee release notes: %s\n' "$VERSION" "$VERSION" "$RELEASE_URL" > /tmp/release-notes/PR.md
+          printf 'Update to v%s\n\nSee release notes: %s\n' "$VERSION" "$RELEASE_URL" > /tmp/release-notes/PR.md
 
       - name: Fork and clone Plugins repo
         id: fork
