@@ -128,7 +128,7 @@ jobs:
           OPEN_PR=$(gh pr list \
             --repo "$PLUGINS_REPO" \
             --state open \
-            --search "[${SLUG}] in:title" \
+            --search "is:open is:pr [${SLUG}] in:title" \
             --json number,title \
             --jq '.[0].number // empty')
 
