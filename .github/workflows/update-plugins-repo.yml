@@ -1,9 +1,8 @@
 name: Update Plugins Repo
 
 # When a tracked plugin repo publishes a new stable release, this workflow:
-#   1. Generates release notes via GitHub Models API (gpt-4o)
-#   2. Downloads and extracts the release ZIP
-#   3. Opens a PR against the community Plugins repo (vars.PLUGINS_REPO)
+#   1. Downloads and extracts the release ZIP
+#   2. Opens a PR against the community Plugins repo (vars.PLUGINS_REPO)
 #      from a branch in the sethwv/Plugins fork named auto/bump/SLUG-VERSION
 
 on:
