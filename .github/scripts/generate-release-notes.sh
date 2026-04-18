@@ -112,14 +112,17 @@ REQUEST_BODY=$(jq -n \
     response_format: {type: "json_object"}
   }')
 
-API_RESPONSE=$(curl -s -f \
+API_RESPONSE=$(curl -s \
   -H "Authorization: Bearer $SETH_PAT" \
   -H "Content-Type: application/json" \
   -d "$REQUEST_BODY" \
-  "https://models.github.com/inference/chat/completions" || true)
+  "https://models.github.com/inference/chat/completions" 2>/dev/null || true)
 
 if [ -z "$API_RESPONSE" ]; then
   echo "::warning::GitHub Models API returned empty response. Using fallback."
+elif echo "$API_RESPONSE" | jq -e '.error' > /dev/null 2>&1; then
+  ERROR_MSG=$(echo "$API_RESPONSE" | jq -r '.error.message // .error // "unknown error"')
+  echo "::warning::GitHub Models API error: $ERROR_MSG. Using fallback."
   API_RESPONSE=""
 fi
 

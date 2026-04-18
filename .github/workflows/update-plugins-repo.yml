@@ -58,8 +58,14 @@ jobs:
             exit 0
           fi
 
-          SLUG=$(echo "$REPO" | cut -d'/' -f2)
+          PLUGIN_JSON_PATH=$(echo "$ENTRY" | jq -r '.plugin_json')
           LOGO_PATH=$(echo "$ENTRY" | jq -r '.logo // empty')
+
+          # Derive slug from plugin.json name field:
+          #   "Embyfin Stream Cleanup" -> embyfin-stream-cleanup
+          PLUGIN_JSON=$(gh api "repos/$REPO/contents/$PLUGIN_JSON_PATH" --jq '.content' | base64 -d)
+          PLUGIN_NAME=$(echo "$PLUGIN_JSON" | jq -r '.name')
+          SLUG=$(echo "$PLUGIN_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
 
           echo "slug=$SLUG"           >> "$GITHUB_OUTPUT"
           echo "logo_path=$LOGO_PATH" >> "$GITHUB_OUTPUT"
@@ -201,7 +207,8 @@ jobs:
           BRANCH="auto/bump-${SLUG}-${VERSION}"
 
           # Fork is idempotent - reuses existing fork
-          gh repo fork "$PLUGINS_REPO" --clone --remote
+          # --clone also sets up the upstream remote automatically
+          gh repo fork "$PLUGINS_REPO" --clone
 
           FORK_OWNER=$(gh api user --jq '.login')
           PLUGINS_REPO_NAME=$(echo "$PLUGINS_REPO" | cut -d'/' -f2)
