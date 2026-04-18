@@ -95,9 +95,7 @@ jobs:
         env:
           SLUG: ${{ steps.config.outputs.slug }}
         run: |
-          RESPONSE=$(gh api "repos/$PLUGINS_REPO/contents/plugins/$SLUG/plugin.json" 2>/dev/null || echo "NOT_FOUND")
-
-          if [ "$RESPONSE" = "NOT_FOUND" ] || echo "$RESPONSE" | jq -e '.message == "Not Found"' > /dev/null 2>&1; then
+          if ! RESPONSE=$(gh api "repos/$PLUGINS_REPO/contents/plugins/$SLUG/plugin.json" 2>/dev/null); then
             echo "current_version=0.0.0" >> "$GITHUB_OUTPUT"
             echo "is_new_plugin=true"    >> "$GITHUB_OUTPUT"
           else
