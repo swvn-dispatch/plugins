@@ -1,4 +1,4 @@
 {
-  "registry_name": "sethwv/dev-plugins",
-  "aggregator_repo": "sethwv/my-plugins"
+  "registry_name": "swvn-dispatch/dev-plugins",
+  "aggregator_repo": "swvn-dispatch/plugins"
 }

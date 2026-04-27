@@ -1,18 +1,18 @@
 [
   {
-    "repo": "sethwv/dispatcharr-exporter",
+    "repo": "swvn-dispatch/dispatcharr-exporter",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
     "dev_tag": "dev-latest"
   },
   {
-    "repo": "sethwv/embyfin-stream-cleanup",
+    "repo": "swvn-dispatch/embyfin-stream-cleanup",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
     "dev_tag": "dev-latest"
   },
   {
-    "repo": "sethwv/disp-ldap",
+    "repo": "swvn-dispatch/disp-ldap",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
     "dev_tag": "dev-latest"
