@@ -1,3 +1,3 @@
-v1.0.0: Initial release of Embyfin Stream Cleanup
+Add CIDR notation support and input whitespace trimming
 
-Dispatcharr plugin that monitors Emby and Jellyfin media server sessions and automatically terminates idle or orphaned connections in Dispatcharr. Supports multiple media servers, configurable timeouts, automatic pause during failover/buffering, and an optional debug dashboard. Requires Dispatcharr v0.22.0 or later.
+Media server client identifiers now accept CIDR blocks (e.g. `10.0.0.0/24`) in addition to plain IPs, hostnames, and usernames, allowing clustered or subnet-routed setups to match without listing every address. IP and username inputs are also trimmed of surrounding whitespace before matching.
