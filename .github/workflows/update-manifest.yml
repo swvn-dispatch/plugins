@@ -11,7 +11,7 @@ on:
     - cron: '0 */6 * * *'   # every 6 hours
   workflow_dispatch:
   repository_dispatch:
-    types: [plugin-updated]
+    types: [plugin-updated, plugin-dev-updated]
 
 permissions:
   contents: write
