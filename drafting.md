@@ -19,16 +19,10 @@ This release includes a major refactor of the plugin's structure and metrics, as
 ---
 
 
-# [v1.0.0](https://github.com/sethwv/embyfin-stream-cleanup/releases/tag/v1.0.0)
+# [v1.1.0](https://github.com/sethwv/embyfin-stream-cleanup/releases/tag/v1.1.0)
 
-Initial Release!
-
-- Dispatcharr plugin that automatically cleans up stale Emby/Jellyfin connections
-- Terminates idle connections and orphaned sessions that are no longer playing on the media server
-- Supports multiple media servers with per-server identifiers (IP, hostname, or XC username)
-- Timers pause automatically during stream failover and buffering
-- Optional debug dashboard for monitoring active channels, matched clients, and recent terminations
-- Requires Dispatcharr v0.22.0 or later
+- Media server identifiers now accept CIDR blocks (e.g. `10.0.0.0/24`) to match entire subnets - useful for clustered or multi-address setups where the server may connect from different IPs
+- IP and username inputs are trimmed of surrounding whitespace before matching, preventing missed connections from accidental spaces in configuration
 
 **Installing**: This plugin is available in the "Get Plugins" section of your Dispatcharr installation.
 **Changelog**: https://github.com/sethwv/embyfin-stream-cleanup/releases/latest
