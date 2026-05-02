@@ -1,3 +1,3 @@
-Add CIDR notation support and input whitespace trimming
+Protect active DVR recording channels from pool-absent termination
 
-Media server client identifiers now accept CIDR blocks (e.g. `10.0.0.0/24`) in addition to plain IPs, hostnames, and usernames, allowing clustered or subnet-routed setups to match without listing every address. IP and username inputs are also trimmed of surrounding whitespace before matching.
+The recording backend connects to Dispatcharr as a client but does not appear as a regular playback session, so channels with an in-progress recording were treated as pool-absent and stopped. The plugin now calls the media server LiveTV recordings API at each scan cycle to identify in-progress recordings and adds those channels to the pool before evaluating termination candidates. The dashboard is updated to reflect recording session counts alongside live sessions, with per-server breakdowns and a DVR badge on affected channel cards.

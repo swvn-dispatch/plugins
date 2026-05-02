@@ -2,7 +2,8 @@ name: Update Plugins Repo
 
 # When a tracked plugin repo publishes a new stable release, this workflow:
 #   1. Downloads and extracts the release ZIP
-#   2. Opens a PR against the community Plugins repo (vars.PLUGINS_REPO)
+#   2. Runs CodeQL (security-extended) on the plugin source
+#   3. Opens or updates a PR against the community Plugins repo (vars.PLUGINS_REPO)
 #      from a branch in the sethwv/Plugins fork named auto/bump/SLUG-VERSION
 
 on:
@@ -21,6 +22,11 @@ concurrency:
 jobs:
   update-plugin:
     runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
 
     env:
       GH_TOKEN: ${{ secrets.SETH_PAT }}
@@ -118,18 +124,20 @@ jobs:
             exit 0
           fi
 
-          # Check for an existing open PR for this slug
-          OPEN_PR=$(gh pr list \
+          # Check for an existing open PR for this slug — capture number and head branch
+          OPEN_PR_JSON=$(gh pr list \
             --repo "$PLUGINS_REPO" \
             --state open \
             --search "is:open is:pr [${SLUG}] in:title" \
-            --json number,title \
-            --jq '.[0].number // empty')
+            --json number,headRefName \
+            --jq '.[0] // empty')
 
-          if [ -n "$OPEN_PR" ]; then
-            echo "::notice::Open PR #$OPEN_PR already exists for '$SLUG'. Skipping."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
+          if [ -n "$OPEN_PR_JSON" ]; then
+            OPEN_PR=$(echo "$OPEN_PR_JSON" | jq -r '.number')
+            OPEN_PR_BRANCH=$(echo "$OPEN_PR_JSON" | jq -r '.headRefName')
+            echo "::notice::Open PR #$OPEN_PR already exists for '$SLUG'. Will update."
+            echo "existing_pr=$OPEN_PR"               >> "$GITHUB_OUTPUT"
+            echo "existing_pr_branch=$OPEN_PR_BRANCH" >> "$GITHUB_OUTPUT"
           fi
 
           echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -163,9 +171,61 @@ jobs:
           CONTENT_DIR=$(dirname "$PLUGIN_JSON")
           echo "content_dir=$CONTENT_DIR" >> "$GITHUB_OUTPUT"
 
+      - name: Stage plugin source for CodeQL
+        if: steps.check.outputs.skip == 'false'
+        env:
+          CONTENT_DIR: ${{ steps.extract.outputs.content_dir }}
+        run: |
+          rm -rf plugin-source
+          mkdir -p plugin-source
+          cp -r "$CONTENT_DIR"/. plugin-source/
+
+      - name: Initialize CodeQL
+        if: steps.check.outputs.skip == 'false'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          queries: security-extended
+          config: |
+            paths:
+              - plugin-source
+
+      - name: Analyze with CodeQL
+        id: codeql_analyze
+        if: steps.check.outputs.skip == 'false'
+        uses: github/codeql-action/analyze@v3
+        with:
+          output: /tmp/codeql-results
+          upload: never
+
+      - name: Check CodeQL results
+        id: codeql_check
+        if: steps.check.outputs.skip == 'false'
+        env:
+          SLUG: ${{ steps.config.outputs.slug }}
+        run: |
+          SARIF=$(ls /tmp/codeql-results/*.sarif 2>/dev/null | head -1)
+          if [ -z "$SARIF" ]; then
+            echo "::warning::No CodeQL SARIF output found — treating as passed."
+            echo "codeql_passed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          RESULTS=$(jq '[.runs[].results // [] | .[]] | length' "$SARIF")
+          echo "CodeQL security-extended results for '$SLUG': $RESULTS issue(s)"
+
+          if [ "$RESULTS" -gt 0 ]; then
+            echo "::error::CodeQL found $RESULTS security issue(s) in '$SLUG'. Skipping PR."
+            jq -r '.runs[].results[] | "  - \(.ruleId): \(.message.text) (\(.locations[0].physicalLocation.artifactLocation.uri):\(.locations[0].physicalLocation.region.startLine))"' "$SARIF" || true
+            echo "codeql_passed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::CodeQL passed — no security-extended issues found."
+            echo "codeql_passed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Generate release notes
         id: notes
-        if: steps.check.outputs.skip == 'false'
+        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
         env:
           VERSION: ${{ steps.release.outputs.version }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
@@ -176,12 +236,18 @@ jobs:
 
       - name: Fork and clone Plugins repo
         id: fork
-        if: steps.check.outputs.skip == 'false'
+        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
           VERSION: ${{ steps.release.outputs.version }}
+          EXISTING_PR_BRANCH: ${{ steps.check.outputs.existing_pr_branch }}
         run: |
-          BRANCH="auto/bump/${SLUG}-${VERSION}"
+          # Reuse the existing PR's head branch when updating; otherwise create a new one
+          if [ -n "$EXISTING_PR_BRANCH" ]; then
+            BRANCH="$EXISTING_PR_BRANCH"
+          else
+            BRANCH="auto/bump/${SLUG}-${VERSION}"
+          fi
 
           # Fork is idempotent - reuses existing fork
           # --clone also sets up the upstream remote automatically
@@ -200,7 +266,7 @@ jobs:
           echo "repo_dir=$PLUGINS_REPO_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Update plugin directory
-        if: steps.check.outputs.skip == 'false'
+        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
           CONTENT_DIR: ${{ steps.extract.outputs.content_dir }}
@@ -214,7 +280,7 @@ jobs:
           git add "plugins/$SLUG"
 
       - name: Commit and push
-        if: steps.check.outputs.skip == 'false'
+        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
           VERSION: ${{ steps.release.outputs.version }}
@@ -239,9 +305,9 @@ jobs:
           git remote set-url origin "https://x-access-token:${{ secrets.SETH_PAT }}@github.com/${FORK_OWNER}/${PLUGINS_REPO_NAME}.git"
           git push -f origin "$BRANCH"
 
-      - name: Create pull request
+      - name: Create or update pull request
         id: pr
-        if: steps.check.outputs.skip == 'false'
+        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
           VERSION: ${{ steps.release.outputs.version }}
@@ -249,6 +315,7 @@ jobs:
           FORK_OWNER: ${{ steps.fork.outputs.fork_owner }}
           IS_NEW_PLUGIN: ${{ steps.current.outputs.is_new_plugin }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
+          EXISTING_PR: ${{ steps.check.outputs.existing_pr }}
         run: |
           PR_TITLE=$(head -1 /tmp/release-notes/PR.md)
           HIGHLIGHTS=$(cat /tmp/release-notes/HIGHLIGHTS.md)
@@ -278,14 +345,24 @@ jobs:
 
           ${CHECKLIST}"
 
-          PR_URL=$(gh pr create \
-            --repo "$PLUGINS_REPO" \
-            --base main \
-            --head "${FORK_OWNER}:${BRANCH}" \
-            --title "$FULL_PR_TITLE" \
-            --body "$PR_BODY")
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr edit "$EXISTING_PR" \
+              --repo "$PLUGINS_REPO" \
+              --title "$FULL_PR_TITLE" \
+              --body "$PR_BODY"
+            PR_URL=$(gh pr view "$EXISTING_PR" --repo "$PLUGINS_REPO" --json url --jq '.url')
+            echo "pr_action=updated" >> "$GITHUB_OUTPUT"
+          else
+            PR_URL=$(gh pr create \
+              --repo "$PLUGINS_REPO" \
+              --base main \
+              --head "${FORK_OWNER}:${BRANCH}" \
+              --title "$FULL_PR_TITLE" \
+              --body "$PR_BODY")
+            echo "pr_action=created" >> "$GITHUB_OUTPUT"
+          fi
 
-          echo "pr_url=$PR_URL"       >> "$GITHUB_OUTPUT"
+          echo "pr_url=$PR_URL"          >> "$GITHUB_OUTPUT"
           echo "pr_title=$FULL_PR_TITLE" >> "$GITHUB_OUTPUT"
 
       - name: Write job summary
@@ -300,12 +377,18 @@ jobs:
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
           PR_URL: ${{ steps.pr.outputs.pr_url }}
           PR_TITLE: ${{ steps.pr.outputs.pr_title }}
+          PR_ACTION: ${{ steps.pr.outputs.pr_action }}
           SKIP: ${{ steps.check.outputs.skip }}
+          CODEQL_PASSED: ${{ steps.codeql_check.outputs.codeql_passed }}
           SOURCE_REPO: ${{ steps.source.outputs.repo }}
         run: |
           {
             if [ -n "$PR_URL" ]; then
-              echo "## Plugin PR Created"
+              if [ "$PR_ACTION" = "updated" ]; then
+                echo "## Plugin PR Updated"
+              else
+                echo "## Plugin PR Created"
+              fi
               echo ""
               echo "| | |"
               echo "|---|---|"
@@ -326,10 +409,15 @@ jobs:
                 cat /tmp/release-notes/PR.md
                 echo "\`\`\`"
               fi
+            elif [ "$CODEQL_PASSED" = "false" ]; then
+              echo "## Blocked by CodeQL"
+              echo ""
+              echo "CodeQL (security-extended) found issues in \`$SLUG\` v${VERSION}. PR not created."
+              echo "Review the \`Check CodeQL results\` step logs for details."
             elif [ "$SKIP" = "true" ]; then
               echo "## Skipped"
               echo ""
-              echo "No update needed for \`$SLUG\` — already at v${VERSION} or a PR is already open."
+              echo "No update needed for \`$SLUG\` — already at v${VERSION} in Plugins repo."
             elif [ -z "$SLUG" ]; then
               echo "## Skipped"
               echo ""

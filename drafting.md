@@ -19,10 +19,10 @@ This release includes a major refactor of the plugin's structure and metrics, as
 ---
 
 
-# [v1.1.0](https://github.com/sethwv/embyfin-stream-cleanup/releases/tag/v1.1.0)
+# [v1.1.1](https://github.com/sethwv/embyfin-stream-cleanup/releases/tag/v1.1.0)
 
-- Media server identifiers now accept CIDR blocks (e.g. `10.0.0.0/24`) to match entire subnets - useful for clustered or multi-address setups where the server may connect from different IPs
-- IP and username inputs are trimmed of surrounding whitespace before matching, preventing missed connections from accidental spaces in configuration
+- Channels with an active DVR recording are no longer terminated as pool-absent - the plugin now queries in-progress recordings from each media server and protects those channels
+- The dashboard session counts now include recording sessions, with per-server breakdowns showing live vs. DVR counts and a DVR badge on affected channel cards
 
 **Installing**: This plugin is available in the "Get Plugins" section of your Dispatcharr installation.
 **Changelog**: https://github.com/sethwv/embyfin-stream-cleanup/releases/latest

@@ -1,7 +1,7 @@
 ## [Unreleased]
 
-### Added
-- CIDR notation support for media server identifiers - specify a subnet (e.g. `10.0.0.0/24`) to match any client IP within that range, useful for clustered or multi-address setups
-
 ### Fixed
-- Leading and trailing whitespace in IP and username inputs is now stripped before matching, preventing missed connections from accidental spaces in configuration
+- Channels with an active in-progress DVR recording are now protected from pool-absent termination. The recording backend connects to Dispatcharr as a client but does not appear as a regular playback session, so previously its channel would be considered absent from the pool and stopped. The plugin now queries each media server for in-progress recordings and adds those channels to the pool before evaluating termination candidates.
+
+### Changed
+- The dashboard now shows recording sessions alongside live sessions in the media server pool count, with per-server breakdowns indicating live vs. DVR counts. Channel cards display a DVR badge when an active recording is in progress on that channel.
