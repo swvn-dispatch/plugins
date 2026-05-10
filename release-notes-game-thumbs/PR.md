@@ -1,3 +1,3 @@
-v1.8.0 - Generic event support, new soccer leagues, font registry, disk caching
+Release v1.8.1
 
-Adds support for generating covers and thumbnails for non-matchup league events (e.g. races) via new `title`, `subtitle`, and `iconurl` query parameters, along with a font registry and bundled Saira Stencil fonts. Includes two new soccer leagues (US Open Cup, USL Championship), an `ALLOW_EVENT_OVERLAYS` environment flag, and a switch from in-memory to filesystem-backed image caching.
+Switches AHL to HockeyTech as its data source, updates the HockeyTech provider to skip playoff bracket seasons with TBD teams in favor of the first complete roster season, and fixes league thumb/cover layouts to prevent elements from overlapping or clipping when a logo, title/subtitle, and icon are all present.
