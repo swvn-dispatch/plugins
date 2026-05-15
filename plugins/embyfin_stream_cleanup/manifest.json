@@ -9,10 +9,10 @@
     {
       "version": "1.2.0",
       "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.2.0/embyfin-stream-cleanup-1.2.0.zip",
-      "checksum_sha256": "0832203697916d538e5e930c9ef6f262174daac62482f4a6c4306536d77896ca",
-      "build_timestamp": "2026-05-15T16:59:09Z",
-      "commit_sha": "9ec094847c11156db0ce85cc2c5b29116a76ae9b",
-      "commit_sha_short": "9ec09484",
+      "checksum_sha256": "35c925313d4fc1aab7753465736c2308c6b7f723f6a18f19b3d6c45fc7bafe99",
+      "build_timestamp": "2026-05-15T17:03:40Z",
+      "commit_sha": "52f71805aa7d2b1f417abc6761d2ddc6618a570e",
+      "commit_sha_short": "52f71805",
       "min_dispatcharr_version": "v0.22.0"
     },
     {
@@ -74,10 +74,10 @@
   "latest": {
     "version": "1.2.0",
     "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.2.0/embyfin-stream-cleanup-1.2.0.zip",
-    "checksum_sha256": "0832203697916d538e5e930c9ef6f262174daac62482f4a6c4306536d77896ca",
-    "build_timestamp": "2026-05-15T16:59:09Z",
-    "commit_sha": "9ec094847c11156db0ce85cc2c5b29116a76ae9b",
-    "commit_sha_short": "9ec09484",
+    "checksum_sha256": "35c925313d4fc1aab7753465736c2308c6b7f723f6a18f19b3d6c45fc7bafe99",
+    "build_timestamp": "2026-05-15T17:03:40Z",
+    "commit_sha": "52f71805aa7d2b1f417abc6761d2ddc6618a570e",
+    "commit_sha_short": "52f71805",
     "min_dispatcharr_version": "v0.22.0"
   }
 }
