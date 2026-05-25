@@ -17,6 +17,10 @@
 			"path": "../dispatcharr-ldap"
 		},
 		{
+			"name": "multiview",
+			"path": "../multiview"
+		},
+		{
 			"name": "Dispatcharr",
 			"path": "../plugin-repo-work/Dispatcharr"
 		}

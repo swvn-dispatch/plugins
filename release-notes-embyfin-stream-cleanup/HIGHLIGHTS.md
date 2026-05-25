@@ -1,2 +1,1 @@
-- Fixed client matching for setups with multiple media servers that share session identifiers
-- Fixed compatibility with newer Dispatcharr versions that renamed the internal `ts_proxy` module to `live_proxy`
+- Fixed Jellyfin DVR recording sessions being killed as orphans - active recordings are now correctly detected and protected from termination
