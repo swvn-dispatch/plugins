@@ -44,6 +44,16 @@
       "manifest_url": "plugins/ldap_auth/manifest.json",
       "icon_url": "plugins/ldap_auth/logo.png",
       "help_url": "https://github.com/swvn-dispatch/dispatcharr-ldap"
+    },
+    {
+      "slug": "multiview",
+      "name": "Multiview",
+      "description": "Tile multiple Dispatcharr channel streams into multi-view outputs using FFmpeg",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/multiview/manifest.json",
+      "icon_url": "plugins/multiview/logo.png",
+      "help_url": "https://github.com/swvn-dispatch/dispatcharr-multiview"
     }
   ]
 }
