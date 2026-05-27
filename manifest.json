@@ -51,8 +51,13 @@
       "description": "Tile multiple Dispatcharr channel streams into multi-view outputs using FFmpeg",
       "author": "sethwv",
       "license": "MIT",
+      "latest_version": "0.1.0",
+      "last_updated": "2026-05-27T19:18:40Z",
       "manifest_url": "plugins/multiview/manifest.json",
+      "latest_url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.1.0/multiview-0.1.0.zip",
+      "latest_sha256": "d10c2ed64d03a26a0df996038d5fbff33ba2ae571dabde0394d3eec477fef5a4",
       "icon_url": "plugins/multiview/logo.png",
+      "min_dispatcharr_version": "v0.22.0",
       "discord_thread": "",
       "help_url": "https://github.com/swvn-dispatch/dispatcharr-multiview"
     }
