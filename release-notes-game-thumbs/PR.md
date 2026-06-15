@@ -1,3 +1,3 @@
-Release v1.8.1
+Release v1.9.0
 
-Switches AHL to HockeyTech as its data source, updates the HockeyTech provider to skip playoff bracket seasons with TBD teams in favor of the first complete roster season, and fixes league thumb/cover layouts to prevent elements from overlapping or clipping when a logo, title/subtitle, and icon are all present.
+Adds Canadian Baseball League support via a new Supabase provider, expands rugby coverage with 10 new leagues and ESPN data for 7 existing ones, renames two rugby league keys for clarity, rejects double-slash URL paths with a 444 error, and fixes SVG rendering for team cover logos.
