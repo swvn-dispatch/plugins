@@ -303,8 +303,7 @@ jobs:
           git commit -m "$COMMIT_MSG" -m "$PR_BODY"
 
           # Push to fork using PAT for attribution
-          PLUGINS_REPO_NAME=$(echo "$PLUGINS_REPO" | cut -d'/' -f2)
-          git remote set-url origin "https://x-access-token:${{ secrets.SETH_PAT }}@github.com/${FORK_OWNER}/${PLUGINS_REPO_NAME}.git"
+          git remote set-url origin "https://x-access-token:${{ secrets.SETH_PAT }}@github.com/${FORK_OWNER}/${{ steps.fork.outputs.repo_dir }}.git"
           git push -f origin "$BRANCH"
 
       - name: Create or update pull request
