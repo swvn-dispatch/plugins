@@ -250,13 +250,15 @@ jobs:
           fi
 
           # Fork is idempotent - reuses existing fork
-          # --clone also sets up the upstream remote automatically
-          gh repo fork "$PLUGINS_REPO" --clone
+          gh repo fork "$PLUGINS_REPO"
 
           FORK_OWNER=$(gh api user --jq '.login')
-          PLUGINS_REPO_NAME=$(echo "$PLUGINS_REPO" | cut -d'/' -f2)
+          # Get the actual fork name - may differ from upstream if there's a naming conflict
+          PLUGINS_REPO_NAME=$(gh api "repos/$PLUGINS_REPO/forks" --jq ".[] | select(.owner.login == \"$FORK_OWNER\") | .name")
 
+          git clone "https://github.com/${FORK_OWNER}/${PLUGINS_REPO_NAME}.git"
           cd "$PLUGINS_REPO_NAME"
+          git remote add upstream "https://github.com/${PLUGINS_REPO}.git"
 
           git fetch upstream
           git checkout -B "$BRANCH" upstream/main
