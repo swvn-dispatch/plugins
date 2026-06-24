@@ -34,10 +34,10 @@
       "min_dispatcharr_version": "v0.22.0"
     },
     {
-      "version": "0.2.0-dev-b8e42572",
+      "version": "0.2.1-dev-9beaaf5a",
       "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/dev-latest/multiview-dev-latest.zip",
-      "checksum_sha256": "56a17bb17ba64878283b2d02e554d27f3e3a811f8f943ecd34b43296aa75d440",
-      "build_timestamp": "2026-06-24T23:20:14Z",
+      "checksum_sha256": "f8083cb302ddc5ea09ac784e938e42efe2ade521bdda1e5d856335321bfc5102",
+      "build_timestamp": "2026-06-24T23:35:32Z",
       "prerelease": true,
       "commit_sha": "b8e425723985bebc11cc62bdd805bf49de6876ad",
       "commit_sha_short": "b8e42572",
