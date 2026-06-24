@@ -1,14 +1,22 @@
-## [v0.1.0] - Initial release
+## [Unreleased] - v0.2.0
 
 ### Added
-- Tile 2-9 Dispatcharr channel streams into a single MPEG-TS output using FFmpeg xstack; each layout appears as a standard M3U channel
-- Three layout styles: Auto Grid (square-ish grid, last row centred), Featured (channel 1 large on the left, others stacked on the right), and Top Featured (channel 1 full-width on top, others in a row at the bottom)
-- Classic channel selection via dropdowns and Regex selection - enter a pattern (e.g. `TSN\s*\d`) to match channels by name automatically at stream time, sorted by channel number
-- Hardware encoder support: Software (libx264), NVIDIA (h264_nvenc), Intel QuickSync (h264_qsv), AMD/Intel VA-API (h264_vaapi)
-- Multi-audio output: choose a single channel's audio or output one AC3 track per tile; players with multi-track support (VLC, Infuse, mpv) can switch between them. Duplicate track labels are auto-numbered (e.g. `ts1`, `ts2`, `ts3`)
-- Startup placeholder: tiled black frames with channel logos and a "Starting up..." banner display immediately while FFmpeg initialises the real stream
-- EPG support: generates a 14-day XMLTV feed per layout with configurable title, subtitle, and category tags; registered automatically as an EPGSource in Dispatcharr
-- Configurable output resolution (1080p / 720p / 480p), max bitrate, encoder quality (CRF/CQ/global_quality), and encoder preset per global settings
-- Auto-refresh interval setting to regenerate M3U and EPG on a schedule (default 24 h; 0 = manual only via Regenerate M3U button)
-- Streams open through Dispatcharr's ProxyServer so connections appear in the stats view, respect stream profiles and fallback behaviour, and carry the user-agent `multiview-plugin`
-- No FFmpeg processes run when nobody is watching; processes are spawned per request and killed on disconnect
+- PyAV compositor worker: decoding, compositing, and encoding now run in a dedicated subprocess using PyAV (Python FFmpeg bindings). Each tile decodes in its own thread; the compositor blits the latest frame per tile onto a shared canvas and encodes it continuously. A slow or disconnected channel never stalls the grid.
+- "Install PyAV" actions in plugin settings to download and install the PyAV media dependency at runtime, for both amd64/x86_64 and arm64/aarch64 hosts. Internet access is required for the one-time install.
+- PyAV installation status indicator in plugin settings showing whether the media engine is installed and ready for this host's architecture.
+- Configurable output frame rate: 24, 25, 30, 50, or 60 fps (default 30).
+- CBR (constant bitrate) encoding: output bitrate is now a true constant-rate target, not a ceiling. The encoder pads with filler NAL units so the data rate stays flat regardless of content complexity, preventing IPTV player buffer drain and fast-forward on low-motion content.
+- PTS rate limiter: the compositor paces output to 1x realtime using PTS timestamps, preventing fast-forward playback on fast machines where Dispatcharr's live proxy delivers frames faster than realtime.
+
+### Changed
+- Minimum required Dispatcharr version raised from v0.22.0 to v0.27.0.
+- M3U and EPG refresh after "Regenerate M3U" are now serialized (M3U first, then EPG) using a Celery task chain. Previously both tasks fired simultaneously, which caused a Dispatcharr DB collision.
+- Output bitrate field label changed from "Max Output Bitrate" to "Output Bitrate" to reflect CBR behaviour.
+
+### Fixed
+- A/V sync: audio is now PTS-aligned to video at stream startup. The audio buffer is also flushed on channel reconnect, preventing audio lag from accumulating.
+- M3U + EPG simultaneous refresh could cause "INSERT 0 N" DB errors in Dispatcharr when both tasks hit the shared celery connection at the same time.
+
+### Removed
+- Hardware encoder options (NVIDIA h264_nvenc, Intel QuickSync h264_qsv, AMD/Intel VA-API h264_vaapi) are temporarily removed while the compositor is rebuilt on PyAV. Only libx264 (software) is available in this release. Hardware encoders will return as an opt-in mode in a future update.
+- CRF/CQ quality mode removed. Encoding is CBR-only in this release.

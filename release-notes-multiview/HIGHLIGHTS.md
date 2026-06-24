@@ -1,8 +1,9 @@
-- Tile multiple Dispatcharr channels into one stream - each layout shows up as a normal M3U channel in any player
-- Three layouts: Auto Grid, Featured (big left + stack right), Top Featured (big top + row bottom)
-- Pick channels from dropdowns or use a regex pattern to match them automatically at stream time
-- Hardware encoding: NVIDIA, Intel QuickSync, AMD/Intel VA-API, or software (libx264)
-- Multi-audio: output one track per tile and switch between them in VLC, Infuse, or mpv
-- Streams open instantly - a placeholder with channel logos appears while the real stream starts up
-- EPG included: 14-day guide data per layout with configurable title, categories, and subtitle
-- Fully integrated with Dispatcharr - connections show in stats, stream profiles and fallback apply
+**v0.2.0 - Compositor rebuild**
+
+- Streaming core rebuilt on PyAV: each tile decodes in its own thread; a slow or disconnected channel no longer stalls the rest of the grid
+- Install PyAV from the plugin settings page (one-time, needs internet); both amd64 and arm64 hosts supported
+- CBR encoding keeps bitrate constant regardless of content - fixes fast-forward on IPTV players caused by near-zero bitrate on static or logo content
+- A/V sync fixed: audio is PTS-aligned at startup and flushed on reconnect
+- Configurable output frame rate (24/25/30/50/60 fps)
+- Requires Dispatcharr v0.27.0+
+- Note: hardware encoding (NVENC/QSV/VA-API) is temporarily unavailable while the compositor is rebuilt; it will return in a future update
