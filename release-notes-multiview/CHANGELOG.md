@@ -1,22 +1,17 @@
-## [Unreleased] - v0.2.0
+## [0.2.1] - 2026-06-24
 
 ### Added
-- PyAV compositor worker: decoding, compositing, and encoding now run in a dedicated subprocess using PyAV (Python FFmpeg bindings). Each tile decodes in its own thread; the compositor blits the latest frame per tile onto a shared canvas and encodes it continuously. A slow or disconnected channel never stalls the grid.
-- "Install PyAV" actions in plugin settings to download and install the PyAV media dependency at runtime, for both amd64/x86_64 and arm64/aarch64 hosts. Internet access is required for the one-time install.
-- PyAV installation status indicator in plugin settings showing whether the media engine is installed and ready for this host's architecture.
-- Configurable output frame rate: 24, 25, 30, 50, or 60 fps (default 30).
-- CBR (constant bitrate) encoding: output bitrate is now a true constant-rate target, not a ceiling. The encoder pads with filler NAL units so the data rate stays flat regardless of content complexity, preventing IPTV player buffer drain and fast-forward on low-motion content.
-- PTS rate limiter: the compositor paces output to 1x realtime using PTS timestamps, preventing fast-forward playback on fast machines where Dispatcharr's live proxy delivers frames faster than realtime.
+- NVIDIA NVENC hardware encoding (`h264_nvenc`) as an optional encoder, selectable in plugin settings. Requires an NVIDIA GPU with driver support. Startup exits with a clear error if NVENC is selected but unavailable.
+- Encoder preset selection for NVENC (p1-p7, default p4 balanced).
+- Channel logos now load from HTTP URLs in addition to local file paths.
+- Keepalive client: multiview registers a background connection with Dispatcharr's live_proxy so channels stay warm between viewer connections, preventing cold-start delays on reconnect.
+- RSS memory usage logged in the worker heartbeat alongside per-channel frame rates. (Log level will be changed in a later release)
 
 ### Changed
-- Minimum required Dispatcharr version raised from v0.22.0 to v0.27.0.
-- M3U and EPG refresh after "Regenerate M3U" are now serialized (M3U first, then EPG) using a Celery task chain. Previously both tasks fired simultaneously, which caused a Dispatcharr DB collision.
-- Output bitrate field label changed from "Max Output Bitrate" to "Output Bitrate" to reflect CBR behaviour.
+- Channel reconnect now uses exponential backoff (2s, 4s, 8s... up to 60s) instead of a fixed 2s delay. Channels give up after 12 consecutive failures (roughly 8 minutes total).
+- Logo rendering preserves aspect ratio and correctly composites transparency over black. Previously logos were cropped to a square and transparent areas were not handled.
+- Logo loading moved to a background thread so startup is not blocked waiting for logo decode.
 
 ### Fixed
-- A/V sync: audio is now PTS-aligned to video at stream startup. The audio buffer is also flushed on channel reconnect, preventing audio lag from accumulating.
-- M3U + EPG simultaneous refresh could cause "INSERT 0 N" DB errors in Dispatcharr when both tasks hit the shared celery connection at the same time.
-
-### Removed
-- Hardware encoder options (NVIDIA h264_nvenc, Intel QuickSync h264_qsv, AMD/Intel VA-API h264_vaapi) are temporarily removed while the compositor is rebuilt on PyAV. Only libx264 (software) is available in this release. Hardware encoders will return as an opt-in mode in a future update.
-- CRF/CQ quality mode removed. Encoding is CBR-only in this release.
+- Server returns 503 when a channel's live_proxy is not yet ready, instead of 200 with an empty body. This lets the compositor worker retry cleanly via its backoff rather than failing with a cryptic "Invalid data found" error.
+- Audio resampler, audio write pipe FDs, and encoder output pipe FD are now properly closed on worker shutdown, eliminating file descriptor leaks.

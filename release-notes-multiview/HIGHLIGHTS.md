@@ -1,9 +1,9 @@
-**v0.2.0 - Compositor rebuild**
+**v0.2.1**
 
-- Streaming core rebuilt on PyAV: each tile decodes in its own thread; a slow or disconnected channel no longer stalls the rest of the grid
-- Install PyAV from the plugin settings page (one-time, needs internet); both amd64 and arm64 hosts supported
-- CBR encoding keeps bitrate constant regardless of content - fixes fast-forward on IPTV players caused by near-zero bitrate on static or logo content
-- A/V sync fixed: audio is PTS-aligned at startup and flushed on reconnect
-- Configurable output frame rate (24/25/30/50/60 fps)
-- Requires Dispatcharr v0.27.0+
-- Note: hardware encoding (NVENC/QSV/VA-API) is temporarily unavailable while the compositor is rebuilt; it will return in a future update
+- NVIDIA NVENC hardware encoding is back - select it in plugin settings (requires NVIDIA GPU + driver) (More hardware support coming later)
+- Channel reconnects now use exponential backoff (up to 60s) and give up cleanly after ~8 minutes of failures instead of retrying forever
+- Logos now load in the background (no startup delay), preserve aspect ratio, and render transparency correctly
+- Logos can now load from HTTP URLs, not just local file paths
+- Keepalive connection keeps channels warm in Dispatcharr between viewer connections, reducing cold-start delays
+- Fixed file descriptor leaks on worker shutdown
+- Fixed 503 response when a channel is not yet ready (was 200 with empty body, causing confusing errors)
