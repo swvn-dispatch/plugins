@@ -1,9 +1,14 @@
-## [0.2.2] - 2026-06-25
+## [Unreleased]
 
 ### Added
 
-- Per-layout EPG source mode: each layout can now forward real EPG data from one of its source channels instead of showing a built-in placeholder entry. When "Forward from channel" is selected, a channel picker appears and the layout's EPG shows actual programme titles, subtitles, and descriptions. Falls back to placeholder if the selected channel has no EPG data.
+- Intel QSV (`h264_qsv`) and VAAPI (`h264_vaapi`) hardware encoder options alongside the existing NVENC option. GPU device is auto-detected from `/dev/dri` with no manual configuration required.
+- EPG forward mode now emits all programme metadata from Dispatcharr's EPG data: categories, episode numbers (xmltv_ns, onscreen, and external IDs), ratings, poster icons, live/premiere/new flags, runtime, country, language, and more. Previously only title, subtitle, and description were forwarded.
+- EPG forward mode appends the layout's channel list to each programme description.
+- Dynamic Warnings section in plugin settings that surfaces common configuration issues: missing PyAV installation, audio copy stream profile that will silently drop multi-track audio, and software encoding (`libx264`) with 4+ streams.
 
 ### Fixed
 
-- Fixed an intermittent plugin load failure that occurred during Dispatcharr reload cycles. Relative `importlib.import_module` calls would fail with `KeyError` or `ModuleNotFoundError` if the parent package was absent from `sys.modules` at reload time. Replaced with a file-path-based loader that bypasses the package registry lookup.
+- Audio desync after channel reconnects and live_proxy fallback resets.
+- Audio track language codes for channels with mixed-case multi-word names (e.g. "Rogers TV" was producing an incorrect language tag).
+- Reduced startup log noise: port race condition demoted to INFO level; warmup retry added for initial channel connections to reduce false error messages.
