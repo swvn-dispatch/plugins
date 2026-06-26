@@ -1,3 +1,3 @@
-Release v1.9.0
+Release v2.0.0: boxing support, badge= on all routes, bundled league logos, HockeyTech fixes
 
-Adds Canadian Baseball League support via a new Supabase provider, expands rugby coverage with 10 new leagues and ESPN data for 7 existing ones, renames two rugby league keys for clarity, rejects double-slash URL paths with a 444 error, and fixes SVG rendering for team cover logos.
+Adds boxing via TheSportsDB athlete provider, extends `badge=` to league and single-team routes (previously matchup-only), enables SVG league logos, bundles 11 league logos locally to fix Wikimedia 429 errors, fixes WHL/OHL/QMJHL team resolution by switching to pinned HockeyTech client codes, fixes Regular-weight custom font rendering in event overlays, adds opt-in SOCKS5 proxy support for HockeyTech, and removes the `/xcproxy` route.
