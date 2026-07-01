@@ -1,7 +1,8 @@
-**Dispatcharr Multiview v0.2.3**
+**v0.3.0**
 
-- **Intel hardware encoding** - QSV and VAAPI encoder options are now available alongside NVENC. GPU device is auto-detected; no configuration needed.
-- **Full EPG forwarding** - Forward mode now passes through all programme metadata: categories, series/episode info, ratings, poster artwork, and live/premiere/new badges. Previously only title and description came through.
-- **Settings warnings** - The plugin settings page now shows alerts for common problems: PyAV not installed, audio copy stream profile that drops multi-track audio, and software encoding with 4+ streams.
-- **Audio desync fix** - Fixed audio falling out of sync after a channel reconnect or live_proxy fallback.
-- **Language code fix** - Fixed incorrect audio track language codes for channels with multi-word names (e.g. "Rogers TV").
+- **Web dashboard** - A mobile-friendly PWA at `http://<host>:9292/dash/` for editing settings and managing active streams (reload a layout, reconnect a channel, refresh M3U/EPG) without the Dispatcharr admin UI. Off by default, enable it in plugin settings.
+- **PyAV auto-reinstall** - After you install PyAV once, the plugin automatically reinstalls it in the background if it ever goes missing, no more repeated manual clicks.
+- **Timeout warning** - Settings page now warns if Dispatcharr's Channel Initialization Timeout is set too low, which can cause tiles to fail on startup.
+- **Featured layout gap fix** - Closed the seam gap between stacked side tiles, without cropping content.
+- **Audio drift fix** - Resyncs audio on unstable streams.
+- **Settings reorganized** - Global settings (dashboard, refresh interval, layout count) now grouped above video settings.
