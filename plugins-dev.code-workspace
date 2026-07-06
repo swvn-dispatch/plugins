@@ -23,6 +23,12 @@
 		{
 			"name": "Dispatcharr",
 			"path": "../plugin-repo-work/Dispatcharr"
+		},
+		{
+			"path": "../webpage-stream"
+		},
+		{
+			"path": "../twitcharr-fork"
 		}
 	],
 	"settings": {

@@ -1,8 +1,5 @@
-**v0.3.0**
+**3.0.1**
 
-- **Web dashboard** - A mobile-friendly PWA at `http://<host>:9292/dash/` for editing settings and managing active streams (reload a layout, reconnect a channel, refresh M3U/EPG) without the Dispatcharr admin UI. Off by default, enable it in plugin settings.
-- **PyAV auto-reinstall** - After you install PyAV once, the plugin automatically reinstalls it in the background if it ever goes missing, no more repeated manual clicks.
-- **Timeout warning** - Settings page now warns if Dispatcharr's Channel Initialization Timeout is set too low, which can cause tiles to fail on startup.
-- **Featured layout gap fix** - Closed the seam gap between stacked side tiles, without cropping content.
-- **Audio drift fix** - Resyncs audio on unstable streams.
-- **Settings reorganized** - Global settings (dashboard, refresh interval, layout count) now grouped above video settings.
+- **Settings crash fixed** - Picking the same channel in two slots of a layout with EPG forwarding on no longer crashes the settings page or dashboard.
+- **Dashboard reliability fix** - Fixed an issue that could cause the dashboard, and occasionally the settings page, to stop responding after extended use.
+- **Auto Grid layout fix** - Rows in the Auto Grid layout now meet cleanly in the middle instead of leaving a gap between them.
