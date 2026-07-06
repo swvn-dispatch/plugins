@@ -63,6 +63,18 @@ jobs:
             exit 0
           fi
 
+          # A plugin repo can opt out of upstream (community Plugins repo) submission
+          # by setting "never_submit_upstream": true in its own
+          # .github/workflows/manifest-config.json. Missing file/field defaults to false.
+          MANIFEST_CONFIG=$(gh api "repos/$REPO/contents/.github/workflows/manifest-config.json" --jq '.content' 2>/dev/null | base64 -d 2>/dev/null || echo '{}')
+          NEVER_SUBMIT=$(echo "$MANIFEST_CONFIG" | jq -r '.never_submit_upstream // false' 2>/dev/null || echo false)
+
+          if [ "$NEVER_SUBMIT" = "true" ]; then
+            echo "::notice::Repo '$REPO' has never_submit_upstream set in manifest-config.json. Skipping upstream submission."
+            echo "opted_out=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           PLUGIN_JSON_PATH=$(echo "$ENTRY" | jq -r '.plugin_json')
           # Derive slug from plugin.json name field:
           #   "Embyfin Stream Cleanup" -> embyfin-stream-cleanup
@@ -70,6 +82,7 @@ jobs:
           PLUGIN_NAME=$(echo "$PLUGIN_JSON" | jq -r '.name')
           SLUG=$(echo "$PLUGIN_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
 
+          echo "opted_out=false" >> "$GITHUB_OUTPUT"
           echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
 
       - name: Get latest stable release
@@ -382,6 +395,7 @@ jobs:
           SKIP: ${{ steps.check.outputs.skip }}
           CODEQL_PASSED: ${{ steps.codeql_check.outputs.codeql_passed }}
           SOURCE_REPO: ${{ steps.source.outputs.repo }}
+          OPTED_OUT: ${{ steps.config.outputs.opted_out }}
         run: |
           {
             if [ -n "$PR_URL" ]; then
@@ -419,6 +433,10 @@ jobs:
               echo "## Skipped"
               echo ""
               echo "No update needed for \`$SLUG\` — already at v${VERSION} in Plugins repo."
+            elif [ "$OPTED_OUT" = "true" ]; then
+              echo "## Skipped (opted out)"
+              echo ""
+              echo "Repo \`$SOURCE_REPO\` has \`never_submit_upstream: true\` in its manifest-config.json. Not submitting to the community Plugins repo."
             elif [ -z "$SLUG" ]; then
               echo "## Skipped"
               echo ""
