@@ -72,7 +72,7 @@ export function AppHeader({
                     rel="noopener noreferrer"
                     leftSection={<IconBrandGithub size={16} />}
                   >
-                    GitHub
+                    {appName} on GitHub
                   </Menu.Item>
                 )}
                 {kofiUrl && (
@@ -83,7 +83,7 @@ export function AppHeader({
                     rel="noopener noreferrer"
                     leftSection={<IconCoffee size={16} />}
                   >
-                    Support on Ko-fi
+                    Buy me a Coffee
                   </Menu.Item>
                 )}
               </Menu.Dropdown>
