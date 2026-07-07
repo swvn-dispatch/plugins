@@ -1,7 +1,7 @@
 # @swvn-dispatch/dispatch-ui-kit
 
 Shared Mantine theme, layout patterns, and small utilities for the Dispatcharr
-plugin dashboard SPAs (`force-fallback`, `multiview`, and future ones).
+plugin dashboard SPAs (`source-switch`, `multiview`, and future ones).
 Extracted so the identical `ConfirmModal`, login screen, and `AppShell`
 header-bar pattern stop being hand-copied between repos.
 
@@ -152,7 +152,7 @@ safe mechanisms cover "I don't want to log in constantly":
 #### Consumer backend requirements for silent refresh
 
 Each consumer's own backend needs a `/auth/refresh` route (mirrors
-`handle_auth_token` exactly, see `force-fallback/src/dash/api.py` or
+`handle_auth_token` exactly, see `source-switch/src/dash/api.py` or
 `multiview/src/dash/api.py` for the reference implementation): accepts
 `{refresh: "<token>"}`, validates it in-process with
 `rest_framework_simplejwt.tokens.RefreshToken(refresh_str)` (no proxy to
@@ -187,21 +187,21 @@ npm run build
 npm link
 
 # 2. point a consumer at the local link instead of the registry
-cd ../../force-fallback/src/dash/ui   # or multiview/src/dash/ui
+cd ../../source-switch/src/dash/ui   # or multiview/src/dash/ui
 npm link @swvn-dispatch/dispatch-ui-kit
 
 # 3. iterate — rebuild on save, run the consumer's dev server
 cd ../../../sethwv-plugins-dev/ui-kit && npm run build:watch   # terminal A
-cd ../../force-fallback/src/dash/ui && npm run dev              # terminal B
+cd ../../source-switch/src/dash/ui && npm run dev              # terminal B
 
 # 4. when done, restore the registry version
-cd force-fallback/src/dash/ui
+cd source-switch/src/dash/ui
 npm unlink @swvn-dispatch/dispatch-ui-kit
 npm install
 ```
 
 **Consumer `vite.config.js` needs `resolve.dedupe`** (already set in both
-force-fallback and multiview) listing `react`, `react-dom`, and the three
+source-switch and multiview) listing `react`, `react-dom`, and the three
 `@mantine/*` peers. Without it, a linked package can resolve React/Mantine
 from *its own* `node_modules` (it has copies there for its own build) instead
 of the consumer's, causing "Invalid hook call" or broken Mantine context —

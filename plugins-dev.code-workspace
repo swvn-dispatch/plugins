@@ -20,8 +20,8 @@
 			"path": "../emby-stream-cleanup"
 		},
 		{
-			"name": "♻️ Force Fallback",
-			"path": "../force-fallback"
+			"name": "♻️ Source Switch",
+			"path": "../source-switch"
 		},
 
 		// --- OLD / EXPERIMENTAL / WIP ---

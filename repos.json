@@ -30,7 +30,7 @@
     "dev_tag": "dev-latest"
   },
   {
-    "repo": "swvn-dispatch/force-fallback",
+    "repo": "swvn-dispatch/source-switch",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
     "dev_tag": "dev-latest"
