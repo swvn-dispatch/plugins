@@ -1,0 +1,92 @@
+{
+  "slug": "multiview",
+  "name": "Multiview",
+  "description": "Tile multiple Dispatcharr channel streams into multi-view outputs using FFmpeg",
+  "author": "sethwv",
+  "license": "MIT",
+  "latest_version": "0.3.1",
+  "versions": [
+    {
+      "version": "0.3.1",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.3.1/multiview-0.3.1.zip",
+      "checksum_sha256": "0217984677ecb942465aca978fe08a07a03a493fed7c832abc066fb76548f177",
+      "build_timestamp": "2026-07-06T18:07:46Z",
+      "commit_sha": "307215e7ec1320430a2869e1038a439806b2da86",
+      "commit_sha_short": "307215e7",
+      "min_dispatcharr_version": "v0.27.0"
+    },
+    {
+      "version": "0.3.0",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.3.0/multiview-0.3.0.zip",
+      "checksum_sha256": "c7e62dbb29cd095f02ec4c832a2868b62f28e05db906f0cdfb5897ffe7751d08",
+      "build_timestamp": "2026-07-01T01:14:38Z",
+      "commit_sha": "168c81b6c624fed724866907e43fbdbd12d0f8d5",
+      "commit_sha_short": "168c81b6",
+      "min_dispatcharr_version": "v0.27.0"
+    },
+    {
+      "version": "0.2.3",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.2.3/multiview-0.2.3.zip",
+      "checksum_sha256": "acdbd81921f80d55e41524ce042ebd6e3e59605bde9503322f94cf227ada192b",
+      "build_timestamp": "2026-06-25T19:51:18Z",
+      "commit_sha": "0bbcc4d92260a41897a559b351bad72c284d7c81",
+      "commit_sha_short": "0bbcc4d9",
+      "min_dispatcharr_version": "v0.27.0"
+    },
+    {
+      "version": "0.2.2",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.2.2/multiview-0.2.2.zip",
+      "checksum_sha256": "0eaa58367c227ea0a00f09da4999f5b391e89405a598fed0f67c5750353d0898",
+      "build_timestamp": "2026-06-25T14:54:52Z",
+      "commit_sha": "33004cd1eba29114007697d67baacf3c298be7aa",
+      "commit_sha_short": "33004cd1",
+      "min_dispatcharr_version": "v0.27.0"
+    },
+    {
+      "version": "0.2.1",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.2.1/multiview-0.2.1.zip",
+      "checksum_sha256": "0daaee9ce287e5c202a243f25938187aa5cc9ce17f938191dd869170948bccf6",
+      "build_timestamp": "2026-06-24T23:20:54Z",
+      "commit_sha": "b8e425723985bebc11cc62bdd805bf49de6876ad",
+      "commit_sha_short": "b8e42572",
+      "min_dispatcharr_version": "v0.27.0"
+    },
+    {
+      "version": "0.2.0",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.2.0/multiview-0.2.0.zip",
+      "checksum_sha256": "e014bae2b62ea7da3af34538d568f0c3881c53ecd634f0fe7ba9261b0fda71fa",
+      "build_timestamp": "2026-06-24T18:25:14Z",
+      "commit_sha": "28bc4c5ce05bf1cb14245b23ca4226c35f3905ed",
+      "commit_sha_short": "28bc4c5c",
+      "min_dispatcharr_version": "v0.27.0"
+    },
+    {
+      "version": "0.1.0",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.1.0/multiview-0.1.0.zip",
+      "checksum_sha256": "d10c2ed64d03a26a0df996038d5fbff33ba2ae571dabde0394d3eec477fef5a4",
+      "build_timestamp": "2026-05-27T19:18:40Z",
+      "commit_sha": "e1b92ef91a1b4010fa4b6d9bdf1ab3100aa885e3",
+      "commit_sha_short": "e1b92ef9",
+      "min_dispatcharr_version": "v0.22.0"
+    },
+    {
+      "version": "0.3.1-dev-d5f76784",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/dev-latest/multiview-dev-latest.zip",
+      "checksum_sha256": "b7c279448b58548fd30dd9fa134362f19620e63b03f22df02a63ab87b05d7584",
+      "build_timestamp": "2026-07-07T19:21:02Z",
+      "prerelease": true,
+      "commit_sha": "307215e7ec1320430a2869e1038a439806b2da86",
+      "commit_sha_short": "307215e7",
+      "min_dispatcharr_version": "v0.27.0"
+    }
+  ],
+  "latest": {
+    "version": "0.3.1",
+    "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.3.1/multiview-0.3.1.zip",
+    "checksum_sha256": "0217984677ecb942465aca978fe08a07a03a493fed7c832abc066fb76548f177",
+    "build_timestamp": "2026-07-06T18:07:46Z",
+    "commit_sha": "307215e7ec1320430a2869e1038a439806b2da86",
+    "commit_sha_short": "307215e7",
+    "min_dispatcharr_version": "v0.27.0"
+  }
+}

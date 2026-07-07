@@ -1,0 +1,85 @@
+{
+  "registry_name": "swvn-dispatch/dev-plugins",
+  "registry_url": "https://github.com/swvn-dispatch/plugins",
+  "root_url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest",
+  "plugins": [
+    {
+      "slug": "dispatcharr_exporter",
+      "name": "Dispatcharr Exporter",
+      "description": "Expose Dispatcharr metrics in Prometheus exporter-compatible format for monitoring",
+      "author": "sethwv",
+      "license": "MIT",
+      "latest_version": "3.0.1",
+      "last_updated": "2026-05-10T18:23:04Z",
+      "manifest_url": "plugins/dispatcharr_exporter/manifest.json",
+      "latest_url": "https://github.com/swvn-dispatch/dispatcharr-exporter/releases/download/v3.0.1/dispatcharr-exporter-3.0.1.zip",
+      "latest_sha256": "2269a61653f46ab943a0178b6cfdb0da0c7c05f6a6864c9862d5c6ce95ba3149",
+      "icon_url": "plugins/dispatcharr_exporter/logo.png",
+      "min_dispatcharr_version": "v0.22.0",
+      "discord_thread": "https://discord.com/channels/1340492560220684331/1451260201775923421",
+      "help_url": "https://github.com/swvn-dispatch/dispatcharr-exporter"
+    },
+    {
+      "slug": "embyfin_stream_cleanup",
+      "name": "Embyfin Stream Cleanup",
+      "description": "Monitors Dispatcharr client activity and terminates idle Emby/Jellyfin connections",
+      "author": "sethwv",
+      "license": "MIT",
+      "latest_version": "1.2.0",
+      "last_updated": "2026-05-15T17:09:43Z",
+      "manifest_url": "plugins/embyfin_stream_cleanup/manifest.json",
+      "latest_url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.2.0/embyfin-stream-cleanup-1.2.0.zip",
+      "latest_sha256": "f59ac77a32a4636fae789bc7fe80310584f248723092a6b2ca837e7cd1430140",
+      "icon_url": "plugins/embyfin_stream_cleanup/logo.png",
+      "min_dispatcharr_version": "v0.22.0",
+      "discord_thread": "https://discord.com/channels/1340492560220684331/1491487318832447668",
+      "help_url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup"
+    },
+    {
+      "slug": "ldap_auth",
+      "name": "LDAP Auth",
+      "description": "LDAP/Active Directory authentication for UI login and XC endpoints",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/ldap_auth/manifest.json",
+      "icon_url": "plugins/ldap_auth/logo.png",
+      "help_url": "https://github.com/swvn-dispatch/dispatcharr-ldap"
+    },
+    {
+      "slug": "multiview",
+      "name": "Multiview",
+      "description": "Tile multiple Dispatcharr channel streams into multi-view outputs using FFmpeg",
+      "author": "sethwv",
+      "license": "MIT",
+      "latest_version": "0.3.1",
+      "last_updated": "2026-07-06T18:07:46Z",
+      "manifest_url": "plugins/multiview/manifest.json",
+      "latest_url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.3.1/multiview-0.3.1.zip",
+      "latest_sha256": "0217984677ecb942465aca978fe08a07a03a493fed7c832abc066fb76548f177",
+      "icon_url": "plugins/multiview/logo.png",
+      "min_dispatcharr_version": "v0.27.0",
+      "discord_thread": "https://discord.com/channels/1340492560220684331/1509200002407465001",
+      "help_url": "https://github.com/swvn-dispatch/dispatcharr-multiview"
+    },
+    {
+      "slug": "twitcharr",
+      "name": "Twitcharr",
+      "description": "A polished Twitch Live TV lineup for Dispatcharr. Add channels or discovery rules, then sync channels, streams and XMLTV guide data using anonymous Twitch metadata only. No OAuth, Client ID, Client Secret or Twitch sign-in required.",
+      "author": "eliasbruno124",
+      "license": "MIT",
+      "manifest_url": "plugins/twitcharr/manifest.json",
+      "icon_url": "plugins/twitcharr/logo.png",
+      "help_url": "https://github.com/eliasbruno124-dev/Twitcharr"
+    },
+    {
+      "slug": "force_fallback",
+      "name": "Force Fallback",
+      "description": "Mobile-friendly dashboard to view live Dispatcharr stream sessions, connected clients, and swap sources on the fly",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/force_fallback/manifest.json",
+      "icon_url": "plugins/force_fallback/logo.png",
+      "help_url": "https://github.com/swvn-dispatch/force-fallback"
+    }
+  ]
+}

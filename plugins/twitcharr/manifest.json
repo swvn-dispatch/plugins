@@ -1,0 +1,18 @@
+{
+  "slug": "twitcharr",
+  "name": "Twitcharr",
+  "description": "A polished Twitch Live TV lineup for Dispatcharr. Add channels or discovery rules, then sync channels, streams and XMLTV guide data using anonymous Twitch metadata only. No OAuth, Client ID, Client Secret or Twitch sign-in required.",
+  "author": "eliasbruno124",
+  "license": "MIT",
+  "versions": [
+    {
+      "version": "0.0.0-dev-31802b66",
+      "url": "https://github.com/swvn-dispatch/twitcharr-fork/releases/download/dev-latest/twitcharr-dev-latest.zip",
+      "checksum_sha256": "a93f6b4105b7b5b2c78bf8612f03f97d950bc57a8d4a16848d3e5a07332e6abf",
+      "build_timestamp": "2026-07-06T23:34:08Z",
+      "prerelease": true,
+      "commit_sha": "22f523e8a450e1f61b62f9f299d9f90bd7c15b1b",
+      "commit_sha_short": "22f523e8"
+    }
+  ]
+}
