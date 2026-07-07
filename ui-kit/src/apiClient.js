@@ -6,7 +6,7 @@
  * @param {string} [opts.refreshTokenKey] - localStorage key for the refresh token, defaults to `${tokenKey}_refresh`
  * @param {string} [opts.refreshPath] - refresh endpoint, relative to the api base, defaults to '/auth/refresh'
  * @param {string} [opts.usernameKey] - localStorage key for the logged-in username, defaults to `${tokenKey}_username`.
- *                                       Separate from LoginScreen's "remember me" key — this tracks who the *active*
+ *                                       Separate from LoginScreen's "remember me" key: this tracks who the *active*
  *                                       session belongs to, cleared on logout regardless of the remember-me choice.
  * @returns {{ request, login, logout, isAuthenticated, getToken, getUsername, basePath }}
  */
@@ -108,7 +108,7 @@ export function createApiClient({
           await refreshAccessToken();
           return await rawRequest(path, options);
         } catch {
-          // refresh (or the retried request) failed — fall through to a full logout below
+          // refresh (or the retried request) failed, fall through to a full logout below
         }
       }
 
