@@ -135,13 +135,15 @@ export function AppHeader({
           ))}
           <Stack gap={0} align="flex-end">
             {username && (
-              <Text size="xs" c="dimmed" lh={1}>
+              <Text size="xs" lh={1}>
                 {username}
               </Text>
             )}
-            <Button size="sm" variant="subtle" onClick={onLogout}>
-              Logout
-            </Button>
+            <UnstyledButton onClick={onLogout}>
+              <Text size="xs" c="dimmed" lh={1}>
+                Logout
+              </Text>
+            </UnstyledButton>
           </Stack>
         </Group>
       </Group>
