@@ -28,5 +28,11 @@
     "plugin_json": "twitcharr/plugin.json",
     "logo": "twitcharr/logo.png",
     "dev_tag": "dev-latest"
+  },
+  {
+    "repo": "swvn-dispatch/force-fallback",
+    "plugin_json": "src/plugin.json",
+    "logo": "src/logo.png",
+    "dev_tag": "dev-latest"
   }
 ]

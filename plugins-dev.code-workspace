@@ -29,6 +29,9 @@
 		},
 		{
 			"path": "../twitcharr-fork"
+		},
+		{
+			"path": "../force-fallback"
 		}
 	],
 	"settings": {
