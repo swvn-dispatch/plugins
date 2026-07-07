@@ -13,11 +13,12 @@ neither consumer app has one today, and this package doesn't invent one.
 Distributed via GitHub Packages under the `@swvn-dispatch` scope, as a normal
 versioned dependency (not a git dependency).
 
-Add to the consuming app's `package.json`:
+Add to the consuming app's `package.json`, **pinned exactly (no `^`)** —
+see "Bumping consumer apps after a release" below for why:
 
 ```json
 "dependencies": {
-  "@swvn-dispatch/dispatch-ui-kit": "^0.1.0"
+  "@swvn-dispatch/dispatch-ui-kit": "0.1.0"
 }
 ```
 
@@ -173,6 +174,44 @@ this repo (`sethwv-plugins-dev`). Pick a version bump (`patch`/`minor`/
 `major`); the workflow builds and validates first, then bumps, tags
 (`ui-kit-vX.Y.Z`), and publishes — a failed build produces no tag, no commit,
 no publish.
+
+### Bumping consumer apps after a release
+
+**This never happens automatically, for any bump size — on purpose.** Both
+consumer apps pin this package to an **exact version** (no `^` range). That
+was a deliberate fix, not the original design: with a caret range like
+`^0.1.0`, patch bumps (`0.1.0` → `0.1.1`) are technically in-range but only
+get picked up by a fresh install if there's no committed lockfile pinning
+the old resolved version, while minor/major bumps are never picked up
+regardless of lockfile (npm's caret range treats the minor digit like a
+major-version boundary for pre-1.0 packages). That meant the two apps here
+could silently behave *differently* from each other on the exact same patch
+release, depending on which one happened to have a lockfile checked in at
+the time. An exact pin makes the answer the same for every app, every bump
+size, always: nothing changes until something explicitly bumps it.
+
+Neither consumer commits `package-lock.json` (both gitignore
+`src/dash/ui/package-lock.json`) — with everything pinned exactly, a
+lockfile doesn't add reproducibility for *this* dependency, and not tracking
+it avoids the two apps' lockfiles drifting out of sync with each other or
+with `package.json` as a separate maintenance chore.
+
+Run, from this directory:
+
+```bash
+./bump-consumers.sh
+```
+
+(Needs `NODE_AUTH_TOKEN` exported in your shell, same as any other local
+install.) This runs `npm install @swvn-dispatch/dispatch-ui-kit@latest --save-exact`
+in every consumer app in one shot — rewriting each one's exact pin in
+`package.json` and installing. Review and commit the `package.json` change
+in each consumer repo (the regenerated local `package-lock.json` is
+gitignored, nothing to commit there). Add a new
+consumer to the `CONSUMERS` array in the script when one exists.
+
+(Equivalent by hand, per app, if you'd rather:
+`cd <app>/src/dash/ui && npm install @swvn-dispatch/dispatch-ui-kit@latest --save-exact`.)
 
 **Gotcha already hit once, fixed, worth knowing if you touch this workflow
 again:** `npm version <type>`'s *own* built-in git commit does not reliably
