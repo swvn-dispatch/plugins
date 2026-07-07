@@ -1,37 +1,45 @@
 {
 	"folders": [
+		// --- AGGREGATOR REPO ---
 		{
 			"name": "sethwv-plugins-dev",
 			"path": "."
 		},
+		// --- ACTIVE PLUGINS ---
 		{
-			"name": "emby-stream-cleanup",
-			"path": "../emby-stream-cleanup"
-		},
-		{
-			"name": "dispatcharr-exporter",
+			"name": "🔥 Prometheus Exporter",
 			"path": "../dispatcharr-exporter"
 		},
 		{
-			"name": "dispatcharr-ldap",
-			"path": "../dispatcharr-ldap"
-		},
-		{
-			"name": "multiview",
+			"name": "🖥️ Multiview",
 			"path": "../multiview"
 		},
 		{
-			"name": "Dispatcharr",
-			"path": "../plugin-repo-work/Dispatcharr"
+			"name": "🧼 Embyfin Cleanup",
+			"path": "../emby-stream-cleanup"
 		},
 		{
-			"path": "../webpage-stream"
-		},
-		{
-			"path": "../twitcharr-fork"
-		},
-		{
+			"name": "♻️ Force Fallback",
 			"path": "../force-fallback"
+		},
+
+		// --- OLD / EXPERIMENTAL / WIP ---
+		// {
+		// 	"path": "../dispatcharr-ldap"
+		// },
+		// {
+		// 	"path": "../webpage-stream"
+		// },
+
+		//--- PRIVATE FORKS ---
+		// {
+		// 	"path": "../twitcharr-fork"
+		// },
+
+		//--- DISPATCHARR UPSTREAM ---
+		{
+			"name": "Dispatcharr",
+			"path": "../Dispatcharr-upstream"
 		}
 	],
 	"settings": {
