@@ -10,8 +10,8 @@
 # exported in this shell — see README.md's "Local dev" section.
 #
 # Assumes the sibling-checkout layout used elsewhere in this workflow:
-# ~/Development/{sethwv-plugins-dev,force-fallback,multiview}/. Add a new
-# consumer to CONSUMERS below when one exists.
+# ~/Development/{sethwv-plugins-dev,force-fallback,multiview,emby-stream-cleanup}/.
+# Add a new consumer to CONSUMERS below when one exists.
 
 set -euo pipefail
 
@@ -20,6 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONSUMERS=(
   "$SCRIPT_DIR/../../force-fallback/src/dash/ui"
   "$SCRIPT_DIR/../../multiview/src/dash/ui"
+  "$SCRIPT_DIR/../../emby-stream-cleanup/src/dash/ui"
 )
 
 if [ -z "${NODE_AUTH_TOKEN:-}" ]; then

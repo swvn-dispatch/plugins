@@ -23,6 +23,23 @@ local-testing instructions.
 
 ---
 
+## Scripts
+
+`scripts/generate-pwa-icons.py` — standardizes generating a plugin
+dashboard's PWA icons from its source logo (`pip install pillow` required).
+The favicon (`logo.png`) keeps the source's transparency; the install icons
+(`icon-192.png`, `icon-512.png`) get the logo flattened onto an opaque
+background (default `#1a1b1e`, matching the ui-kit's `BACKGROUND_COLOR`) —
+a transparent PNG left as-is looks broken once the OS applies its own
+icon mask/crop outside a browser tab. No maskable safe-zone padding is
+added, matching the existing icons in `force-fallback`/`multiview` exactly.
+
+```bash
+python3 scripts/generate-pwa-icons.py <source-logo.png> <plugin>/src/dash/ui/public
+```
+
+---
+
 ## How it works
 
 ### Layout

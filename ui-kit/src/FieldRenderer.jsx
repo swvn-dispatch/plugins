@@ -1,4 +1,4 @@
-import { Select, NumberInput, TextInput } from '@mantine/core';
+import { Select, NumberInput, TextInput, PasswordInput } from '@mantine/core';
 import { FieldLabel } from './FieldLabel.jsx';
 
 export function FieldRenderer({ field, value, onChange }) {
@@ -35,15 +35,17 @@ export function FieldRenderer({ field, value, onChange }) {
           onChange={onChange}
         />
       );
-    case 'string':
+    case 'string': {
+      const Input = field.input_type === 'password' ? PasswordInput : TextInput;
       return (
-        <TextInput
+        <Input
           {...common}
           value={value ?? field.default ?? ''}
           placeholder={field.placeholder}
           onChange={(e) => onChange(e.currentTarget.value)}
         />
       );
+    }
     default:
       return null;
   }
