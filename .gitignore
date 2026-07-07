@@ -2,3 +2,6 @@
 drafting.md
 
 .claude
+
+node_modules/
+dist/

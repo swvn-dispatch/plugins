@@ -2,9 +2,10 @@
 	"folders": [
 		// --- AGGREGATOR REPO ---
 		{
-			"name": "sethwv-plugins-dev",
+			"name": "📇 swvn-dispatch Plugins",
 			"path": "."
 		},
+
 		// --- ACTIVE PLUGINS ---
 		{
 			"name": "🔥 Prometheus Exporter",

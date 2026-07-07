@@ -1,0 +1,58 @@
+name: Publish UI Kit
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version increment'
+        required: true
+        default: 'patch'
+        type: choice
+        options: [major, minor, patch]
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: publish-ui-kit
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui-kit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+          scope: '@swvn-dispatch'
+
+      - run: npm install
+
+      # Validate BEFORE touching version/tag/publish — a failed build here
+      # stops the workflow with no version bump, no tag, no commit, no publish.
+      - run: npm run build
+
+      - name: Bump version
+        id: bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          NEW_VERSION=$(npm version "${{ inputs.version_type }}" -m "ui-kit: release v%s")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Push commit and tag
+        run: |
+          git push
+          git tag "ui-kit-${{ steps.bump.outputs.version }}"
+          git push origin "ui-kit-${{ steps.bump.outputs.version }}"
+
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SETH_PAT }}
