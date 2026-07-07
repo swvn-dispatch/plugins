@@ -5,7 +5,10 @@
  * @param {(err: Error) => void} [opts.onUnauthorized]
  * @param {string} [opts.refreshTokenKey] - localStorage key for the refresh token, defaults to `${tokenKey}_refresh`
  * @param {string} [opts.refreshPath] - refresh endpoint, relative to the api base, defaults to '/auth/refresh'
- * @returns {{ request, login, logout, isAuthenticated, getToken, basePath }}
+ * @param {string} [opts.usernameKey] - localStorage key for the logged-in username, defaults to `${tokenKey}_username`.
+ *                                       Separate from LoginScreen's "remember me" key — this tracks who the *active*
+ *                                       session belongs to, cleared on logout regardless of the remember-me choice.
+ * @returns {{ request, login, logout, isAuthenticated, getToken, getUsername, basePath }}
  */
 export function createApiClient({
   tokenKey,
@@ -13,6 +16,7 @@ export function createApiClient({
   onUnauthorized,
   refreshTokenKey = `${tokenKey}_refresh`,
   refreshPath = '/auth/refresh',
+  usernameKey = `${tokenKey}_username`,
 } = {}) {
   const BASE = basePath ?? ((typeof window !== 'undefined' && window.__BASE_PATH__) || '/');
 
@@ -32,6 +36,15 @@ export function createApiClient({
   function setRefreshToken(token) {
     if (token) localStorage.setItem(refreshTokenKey, token);
     else localStorage.removeItem(refreshTokenKey);
+  }
+
+  function getUsername() {
+    return localStorage.getItem(usernameKey);
+  }
+
+  function setUsername(username) {
+    if (username) localStorage.setItem(usernameKey, username);
+    else localStorage.removeItem(usernameKey);
   }
 
   async function rawRequest(path, options = {}) {
@@ -101,6 +114,7 @@ export function createApiClient({
 
       setToken(null);
       setRefreshToken(null);
+      setUsername(null);
       onUnauthorized?.(err);
       throw err;
     }
@@ -113,17 +127,19 @@ export function createApiClient({
     });
     setToken(data.access);
     if (data.refresh) setRefreshToken(data.refresh);
+    setUsername(username);
     return data;
   }
 
   function logout() {
     setToken(null);
     setRefreshToken(null);
+    setUsername(null);
   }
 
   function isAuthenticated() {
     return !!getToken();
   }
 
-  return { request, login, logout, isAuthenticated, getToken, basePath: BASE };
+  return { request, login, logout, isAuthenticated, getToken, getUsername, basePath: BASE };
 }

@@ -38,6 +38,7 @@ function activeStyleProps(active) {
  *   onLogout: () => void,
  *   githubUrl?: string,
  *   kofiUrl?: string,
+ *   username?: string,
  * }} props
  */
 export function AppHeader({
@@ -48,6 +49,7 @@ export function AppHeader({
   onLogout,
   githubUrl,
   kofiUrl = 'https://ko-fi.com/sethwv',
+  username,
 }) {
   const logo = <Image src={logoUrl} h={32} w="auto" />;
   const hasMenu = Boolean(githubUrl || kofiUrl);
@@ -131,9 +133,16 @@ export function AppHeader({
               </ActionIcon>
             </Fragment>
           ))}
-          <Button size="sm" variant="subtle" onClick={onLogout}>
-            Logout
-          </Button>
+          <Stack gap={0} align="flex-end">
+            {username && (
+              <Text size="xs" c="dimmed" lh={1}>
+                {username}
+              </Text>
+            )}
+            <Button size="sm" variant="subtle" onClick={onLogout}>
+              Logout
+            </Button>
+          </Stack>
         </Group>
       </Group>
     </AppShell.Header>
