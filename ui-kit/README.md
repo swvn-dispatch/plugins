@@ -116,6 +116,52 @@ empty dropdown). `githubUrl` has no default — pull it from that app's
 `plugin.json` `repo_url` at the call site, it's not something this package
 can know.
 
+### Session persistence: silent token refresh + "Remember me"
+
+**The password is never stored anywhere by this package.** Two separate,
+safe mechanisms cover "I don't want to log in constantly":
+
+1. **Silent access-token refresh.** `createApiClient` accepts the refresh
+   token both consumer backends already issue on login (`RefreshToken.for_user`
+   via `rest_framework_simplejwt`, previously generated but discarded — see
+   each app's `handle_auth_token` / new `handle_auth_refresh` in
+   `src/dash/api.py`) and uses it to silently obtain a new access token on a
+   401, instead of immediately forcing a full re-login. Dispatcharr's access
+   tokens are short-lived (`ACCESS_TOKEN_LIFETIME = 30 minutes` as of this
+   writing); the refresh token lasts a day (`REFRESH_TOKEN_LIFETIME`), so this
+   takes effective session length from 30 minutes to up to 24 hours.
+   - New `createApiClient` options: `refreshTokenKey` (default
+     `` `${tokenKey}_refresh` ``) and `refreshPath` (default `/auth/refresh`).
+   - Concurrent 401s (e.g. several polling intervals firing near-simultaneously)
+     share one in-flight refresh call rather than each triggering their own.
+   - Refresh is attempted **at most once** per failed request — if the refresh
+     itself fails, or the retried request 401s again, it falls through to the
+     normal `onUnauthorized` flow exactly as before. No infinite loop risk.
+   - Requires a matching backend route — see "Consumer backend requirements"
+     below. Without it, this silently no-ops back to today's behavior (fetch
+     to `refreshPath` 404s, refresh "fails", falls through to logout) — not a
+     hard dependency, but the whole point of adding it.
+
+2. **`LoginScreen`'s "Remember me" checkbox** — persists only the
+   *username* (`localStorage`, key `dispatch_ui_kit_last_username`) when
+   checked, prefilling it on return visits; unchecking actively clears any
+   previously saved value. Password fill/save is still entirely the
+   browser's own password manager, via the existing
+   `autoComplete="current-password"` on the form — nothing to configure.
+
+#### Consumer backend requirements for silent refresh
+
+Each consumer's own backend needs a `/auth/refresh` route (mirrors
+`handle_auth_token` exactly, see `force-fallback/src/dash/api.py` or
+`multiview/src/dash/api.py` for the reference implementation): accepts
+`{refresh: "<token>"}`, validates it in-process with
+`rest_framework_simplejwt.tokens.RefreshToken(refresh_str)` (no proxy to
+Dispatcharr core's own `token/refresh/` needed — the plugin already runs
+in-process with Django and can validate directly, same pattern already used
+for issuing the initial token pair), and returns `{access: "<new token>"}` or
+a 401 on `TokenError`. No `_verify_token` gate on this route — recovering
+from an invalid access token is the entire point of it.
+
 ## Important caveats
 
 - **`index.html` / `manifest.json` theme colors are not wired to `theme.js`.**

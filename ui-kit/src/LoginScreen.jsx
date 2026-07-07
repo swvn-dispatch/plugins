@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Center, Stack, Paper, TextInput, PasswordInput, Button, Text, Alert } from '@mantine/core';
+import { Center, Stack, Paper, TextInput, PasswordInput, Checkbox, Button, Text, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
+
+const REMEMBER_USERNAME_KEY = 'dispatch_ui_kit_last_username';
 
 /**
  * @param {string} props.logoUrl
@@ -10,8 +12,10 @@ import { IconAlertCircle } from '@tabler/icons-react';
  * @param {() => void} props.onLoggedIn
  */
 export function LoginScreen({ logoUrl, appName, description, onLogin, onLoggedIn }) {
-  const [username, setUsername] = useState('');
+  const savedUsername = localStorage.getItem(REMEMBER_USERNAME_KEY) ?? '';
+  const [username, setUsername] = useState(savedUsername);
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(!!savedUsername);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,6 +25,8 @@ export function LoginScreen({ logoUrl, appName, description, onLogin, onLoggedIn
     setError('');
     try {
       await onLogin(username, password);
+      if (remember) localStorage.setItem(REMEMBER_USERNAME_KEY, username);
+      else localStorage.removeItem(REMEMBER_USERNAME_KEY);
       onLoggedIn();
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -59,6 +65,11 @@ export function LoginScreen({ logoUrl, appName, description, onLogin, onLoggedIn
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
                 required
+              />
+              <Checkbox
+                label="Remember me"
+                checked={remember}
+                onChange={(e) => setRemember(e.currentTarget.checked)}
               />
               <Button type="submit" loading={loading} fullWidth mt="xs">
                 Sign in
