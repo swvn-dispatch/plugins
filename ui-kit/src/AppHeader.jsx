@@ -57,7 +57,7 @@ export function AppHeader({
       <Group h="100%" px="md" justify="space-between" wrap="nowrap">
         <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
           {hasMenu ? (
-            <Menu shadow="md" width={200} position="bottom-start">
+            <Menu shadow="md" width={300} position="bottom-start">
               <Menu.Target>
                 <UnstyledButton style={{ display: 'flex', alignItems: 'center' }} aria-label="Plugin links">
                   {logo}
