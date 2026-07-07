@@ -1,6 +1,6 @@
 {
   "name": "@swvn-dispatch/dispatch-ui-kit",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -18,7 +18,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "build:watch": "vite build --watch"
   },
   "peerDependencies": {
     "react": "^19.1.0",

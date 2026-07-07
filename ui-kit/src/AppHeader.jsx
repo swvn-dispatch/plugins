@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
-import { AppShell, Group, Image, Text, Button, ActionIcon } from '@mantine/core';
+import { AppShell, Group, Image, Text, Button, ActionIcon, Menu, UnstyledButton, Stack } from '@mantine/core';
+import { IconBrandGithub, IconCoffee } from '@tabler/icons-react';
 
 // Reproduces multiview's exact teal-9/teal-8 highlight (not just a color prop
 // swap) so an `active` HeaderAction matches the original pixel-for-pixel.
@@ -28,18 +29,80 @@ function activeStyleProps(active) {
  * @property {number} [count] - appended as ` (${count})` to the Button label only
  */
 
-/** @param {{ logoUrl: string, version?: string, actions?: HeaderAction[], onLogout: () => void }} props */
-export function AppHeader({ logoUrl, version, actions = [], onLogout }) {
+/**
+ * @param {{
+ *   logoUrl: string,
+ *   appName?: string,
+ *   version?: string,
+ *   actions?: HeaderAction[],
+ *   onLogout: () => void,
+ *   githubUrl?: string,
+ *   kofiUrl?: string,
+ * }} props
+ */
+export function AppHeader({
+  logoUrl,
+  appName,
+  version,
+  actions = [],
+  onLogout,
+  githubUrl,
+  kofiUrl = 'https://ko-fi.com/sethwv',
+}) {
+  const logo = <Image src={logoUrl} h={32} w="auto" />;
+  const hasMenu = Boolean(githubUrl || kofiUrl);
+
   return (
     <AppShell.Header>
       <Group h="100%" px="md" justify="space-between" wrap="nowrap">
         <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
-          <Image src={logoUrl} h={32} w="auto" />
-          {version && (
-            <Text size="xs" c="dimmed">
-              v{version}
-            </Text>
+          {hasMenu ? (
+            <Menu shadow="md" width={200} position="bottom-start">
+              <Menu.Target>
+                <UnstyledButton style={{ display: 'flex', alignItems: 'center' }} aria-label="Plugin links">
+                  {logo}
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {githubUrl && (
+                  <Menu.Item
+                    component="a"
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    leftSection={<IconBrandGithub size={16} />}
+                  >
+                    GitHub
+                  </Menu.Item>
+                )}
+                {kofiUrl && (
+                  <Menu.Item
+                    component="a"
+                    href={kofiUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    leftSection={<IconCoffee size={16} />}
+                  >
+                    Support on Ko-fi
+                  </Menu.Item>
+                )}
+              </Menu.Dropdown>
+            </Menu>
+          ) : (
+            logo
           )}
+          <Stack gap={0}>
+            {appName && (
+              <Text size="xs" lh={1}>
+                {appName}
+              </Text>
+            )}
+            {version && (
+              <Text size="xs" c="dimmed" lh={1}>
+                v{version}
+              </Text>
+            )}
+          </Stack>
         </Group>
         <Group gap="xs" wrap="nowrap">
           {actions.map(({ key, label, icon: Icon, onClick, loading, active, count }) => (

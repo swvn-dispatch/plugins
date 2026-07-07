@@ -44,12 +44,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          NEW_VERSION=$(npm version "${{ inputs.version_type }}" -m "ui-kit: release v%s")
+          NEW_VERSION=$(npm version "${{ inputs.version_type }}" --no-git-tag-version)
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          git add package.json package-lock.json
+          git commit -m "ui-kit: release $NEW_VERSION"
 
+      # Explicit HEAD:main (not a bare `git push`) so this works regardless of
+      # whether actions/checkout left us on a detached HEAD.
       - name: Push commit and tag
         run: |
-          git push
+          git push origin HEAD:main
           git tag "ui-kit-${{ steps.bump.outputs.version }}"
           git push origin "ui-kit-${{ steps.bump.outputs.version }}"
 

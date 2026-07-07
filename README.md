@@ -10,6 +10,19 @@ https://raw.githubusercontent.com/sethwv/my-plugins/manifest/manifest.json
 
 ---
 
+## UI Kit
+
+`ui-kit/` is a separate package, `@swvn-dispatch/dispatch-ui-kit` — shared
+Mantine theme, layout components (header bar, login screen, confirm modal,
+settings panel), and small utilities for the plugin dashboard SPAs
+(`force-fallback`, `multiview`, and future ones). Published independently to
+GitHub Packages via its own `workflow_dispatch` workflow
+(`.github/workflows/publish-ui-kit.yml`), unrelated to the manifest-aggregator
+machinery below. See `ui-kit/README.md` for install, usage, versioning, and
+local-testing instructions.
+
+---
+
 ## How it works
 
 ### Layout
