@@ -35,7 +35,7 @@ function activeStyleProps(active) {
  *   appName?: string,
  *   version?: string,
  *   actions?: HeaderAction[],
- *   onLogout: () => void,
+ *   onLogout?: () => void,
  *   githubUrl?: string,
  *   kofiUrl?: string,
  *   username?: string,
@@ -133,18 +133,20 @@ export function AppHeader({
               </ActionIcon>
             </Fragment>
           ))}
-          <Stack gap={0} align="flex-end">
-            {username && (
-              <Text size="xs" lh={1}>
-                {username}
-              </Text>
-            )}
-            <UnstyledButton onClick={onLogout}>
-              <Text size="xs" c="dimmed" lh={1}>
-                Logout
-              </Text>
-            </UnstyledButton>
-          </Stack>
+          {onLogout && (
+            <Stack gap={0} align="flex-end">
+              {username && (
+                <Text size="xs" lh={1}>
+                  {username}
+                </Text>
+              )}
+              <UnstyledButton onClick={onLogout}>
+                <Text size="xs" c="dimmed" lh={1}>
+                  Logout
+                </Text>
+              </UnstyledButton>
+            </Stack>
+          )}
         </Group>
       </Group>
     </AppShell.Header>

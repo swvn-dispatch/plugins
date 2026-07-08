@@ -37,6 +37,13 @@
 		// 	"path": "../twitcharr-fork"
 		// },
 
+		//--- OTHER RELATED ---
+		{
+		 "name": "🗞️ EPG Viewer",
+			"path": "../epg-viewer"
+		},
+
+
 		//--- DISPATCHARR UPSTREAM ---
 		{
 			"name": "Dispatcharr",
