@@ -2,11 +2,23 @@
 
 All notable changes to `@swvn-dispatch/dispatch-ui-kit` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Releases are published via the `Publish UI Kit` GitHub Actions
-`workflow_dispatch` in the parent `sethwv-plugins-dev` repo, tagged
-`ui-kit-vX.Y.Z`.
+Releases are published by the `Publish UI Kit` GitHub Actions workflow
+(`.github/workflows/publish-ui-kit.yml` in the parent `sethwv-plugins-dev`
+repo), triggered automatically on any push to `main` that bumps
+`package.json`'s version (also runnable manually via `workflow_dispatch`).
+Tagged `ui-kit-X.Y.Z` (no `v` — this naming scheme is meant to generalize
+to future packages built the same way, each with its own
+`<package>-X.Y.Z` tag prefix).
 
 ## [Unreleased]
+
+## [0.1.12] - 2026-07-13
+
+### Internal
+
+- No functional change (re-publish; no `src/` diff vs 0.1.11).
+
+## [0.1.11] - 2026-07-13
 
 ### Added
 

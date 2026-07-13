@@ -1,14 +1,16 @@
 name: Publish UI Kit
 
+# Version bumps happen by hand in ui-kit/package.json (ordinary commit, no
+# workflow-side git commit). This workflow just detects whether that
+# version has already been tagged/published and, if not, builds, tags, and
+# publishes it.
+
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'ui-kit/**'
   workflow_dispatch:
-    inputs:
-      version_type:
-        description: 'Version increment'
-        required: true
-        default: 'patch'
-        type: choice
-        options: [major, minor, patch]
 
 permissions:
   contents: write
@@ -19,7 +21,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      should_publish: ${{ steps.check.outputs.should_publish }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version against existing tags
+        id: check
+        working-directory: ui-kit
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse "ui-kit-$VERSION" >/dev/null 2>&1; then
+            echo "::notice::ui-kit-$VERSION is already tagged. Skipping publish."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
   publish:
+    needs: check-version
+    if: needs.check-version.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,27 +63,16 @@ jobs:
 
       - run: npm install
 
-      # Validate BEFORE touching version/tag/publish — a failed build here
-      # stops the workflow with no version bump, no tag, no commit, no publish.
+      # Validate BEFORE tagging/publishing — a failed build here stops the
+      # workflow with no tag, no publish.
       - run: npm run build
 
-      - name: Bump version
-        id: bump
+      - name: Tag release
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          NEW_VERSION=$(npm version "${{ inputs.version_type }}" --no-git-tag-version)
-          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-          git add package.json package-lock.json
-          git commit -m "ui-kit: release $NEW_VERSION"
-
-      # Explicit HEAD:main (not a bare `git push`) so this works regardless of
-      # whether actions/checkout left us on a detached HEAD.
-      - name: Push commit and tag
-        run: |
-          git push origin HEAD:main
-          git tag "ui-kit-${{ steps.bump.outputs.version }}"
-          git push origin "ui-kit-${{ steps.bump.outputs.version }}"
+          git tag "ui-kit-${{ needs.check-version.outputs.version }}"
+          git push origin "ui-kit-${{ needs.check-version.outputs.version }}"
 
       - run: npm publish
         env:

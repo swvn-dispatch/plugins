@@ -224,11 +224,22 @@ that linking the whole working directory can't.
 
 ## Publishing
 
-`workflow_dispatch`-triggered via `.github/workflows/publish-ui-kit.yml` in
-this repo (`sethwv-plugins-dev`). Pick a version bump (`patch`/`minor`/
-`major`); the workflow builds and validates first, then bumps, tags
-(`ui-kit-vX.Y.Z`), and publishes — a failed build produces no tag, no commit,
-no publish.
+Version bumps are a manual, ordinary edit — no workflow bumps
+`package.json` for you. To cut a release:
+
+1. Bump the `version` field in `ui-kit/package.json` by hand (and update
+   `CHANGELOG.md`: move the `[Unreleased]` entries under a new
+   `## [x.y.z] - YYYY-MM-DD` heading).
+2. Commit and push to `main` (or merge a PR into it).
+
+`.github/workflows/publish-ui-kit.yml` triggers on any push to `main`
+touching `ui-kit/**` (also runnable manually via `workflow_dispatch`). It
+checks whether `package.json`'s current version is already tagged
+(`ui-kit-X.Y.Z` — no `v`; this naming scheme is meant to generalize to
+future packages built the same way); if not, it builds, tags, and
+publishes. If the build fails, nothing is tagged or published — safe to
+fix and push again. The workflow itself never commits anything back to
+`main`.
 
 ### Bumping consumer apps after a release
 
