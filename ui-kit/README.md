@@ -8,6 +8,8 @@ header-bar pattern stop being hand-copied between repos.
 Scope: theme + layout/Mantine-usage patterns. Not a design-token system —
 neither consumer app has one today, and this package doesn't invent one.
 
+See `CHANGELOG.md` for release history.
+
 ## Install
 
 Distributed via GitHub Packages under the `@swvn-dispatch` scope, as a normal
@@ -106,8 +108,15 @@ Ko-fi support page — pass per-app values:
   version={__APP_VERSION__}
   githubUrl="https://github.com/swvn-dispatch/dispatcharr-multiview"
   // kofiUrl defaults to https://ko-fi.com/sethwv — override or pass null to omit
-  onLogout={onLoggedOut}
-  actions={[...]}
+  username={currentUsername}          // optional, shown above the logout link
+  onLogout={onLoggedOut}              // optional — omit to hide the trailing username/logout block entirely
+  actions={[
+    { key: 'refresh', label: 'Refresh', icon: IconRefresh, onClick: doRefresh, loading, active, count,
+      variant: 'light', color: 'teal' },   // both optional — override the desktop Button style per action
+  ]}
+  extra={<SomeCustomHeaderControl />}  // optional — rendered after actions, before the logout block;
+                                        // escape hatch for header content actions[] can't express
+                                        // (e.g. an unlabeled icon button, a dropdown trigger)
 />
 ```
 
