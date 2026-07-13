@@ -25,8 +25,10 @@ function activeStyleProps(active) {
  * @property {React.ComponentType} icon - icon component reference, rendered at two sizes (16/18)
  * @property {() => void} onClick
  * @property {boolean} [loading]
- * @property {boolean} [active] - renders the teal-highlighted variant
+ * @property {boolean} [active] - renders the teal-highlighted variant (overrides variant/color below)
  * @property {number} [count] - appended as ` (${count})` to the Button label only
+ * @property {string} [variant] - Mantine Button variant on desktop; defaults to Mantine's theme default (filled) if unset
+ * @property {string} [color] - Mantine Button color on desktop; defaults to Mantine's theme default if unset
  */
 
 /**
@@ -111,10 +113,12 @@ export function AppHeader({
           </Stack>
         </Group>
         <Group gap="xs" wrap="nowrap">
-          {actions.map(({ key, label, icon: Icon, onClick, loading, active, count }) => (
+          {actions.map(({ key, label, icon: Icon, onClick, loading, active, count, variant, color }) => (
             <Fragment key={key}>
               <Button
                 size="sm"
+                variant={variant}
+                color={color}
                 leftSection={<Icon size={16} />}
                 loading={loading}
                 onClick={onClick}

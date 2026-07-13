@@ -21,6 +21,7 @@ CONSUMERS=(
   "$SCRIPT_DIR/../../source-switch/src/dash/ui"
   "$SCRIPT_DIR/../../multiview/src/dash/ui"
   "$SCRIPT_DIR/../../emby-stream-cleanup/src/dash/ui"
+  "$SCRIPT_DIR/../../epg-viewer"
 )
 
 if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
