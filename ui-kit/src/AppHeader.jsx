@@ -35,6 +35,9 @@ function activeStyleProps(active) {
  *   appName?: string,
  *   version?: string,
  *   actions?: HeaderAction[],
+ *   extra?: React.ReactNode - rendered after `actions`, before the logout block;
+ *     an escape hatch for header content `actions[]` can't express (e.g. an
+ *     unlabeled/non-default-colored icon button, a dropdown menu trigger)
  *   onLogout?: () => void,
  *   githubUrl?: string,
  *   kofiUrl?: string,
@@ -46,6 +49,7 @@ export function AppHeader({
   appName,
   version,
   actions = [],
+  extra,
   onLogout,
   githubUrl,
   kofiUrl = 'https://ko-fi.com/sethwv',
@@ -133,6 +137,7 @@ export function AppHeader({
               </ActionIcon>
             </Fragment>
           ))}
+          {extra}
           {onLogout && (
             <Stack gap={0} align="flex-end">
               {username && (

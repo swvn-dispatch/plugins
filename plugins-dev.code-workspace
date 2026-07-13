@@ -33,9 +33,9 @@
 		// },
 
 		//--- PRIVATE FORKS ---
-		// {
-		// 	"path": "../twitcharr-fork"
-		// },
+		{
+			"path": "../twitcharr-fork"
+		},
 
 		//--- OTHER RELATED ---
 		{
