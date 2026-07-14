@@ -1,11 +1,6 @@
-**v2.0.0**
+**v2.1.0**
 
-- Boxing support added - get athlete thumbnails using the `box` league key
-- `badge=` overlay now works on league and single-team images, not just matchups
-- SVG league logos supported - fixes MiLB and other leagues with SVG-only logos
-- Opt-in SOCKS5 proxy for HockeyTech requests (see docs for env vars)
-- WHL, OHL, and QMJHL team resolution fixed - no longer depends on chl.ca scraping
-- Regular-weight custom league fonts now work correctly in event overlays
-- NRL, rugby, and CBL league logos are now bundled locally - no more Wikimedia 429 errors
+- Support for league All-Star/conference pseudo-teams (e.g. MLB's AL/NL, NFL's AFC/NFC), resolved automatically
+- Fixed a rare team color mix-up where two leagues sharing an ESPN team ID could show the wrong colors
 
 If this has saved you some headaches, tips are appreciated: https://ko-fi.com/sethwv

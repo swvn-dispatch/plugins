@@ -1,3 +1,3 @@
-Release v2.0.0: boxing support, badge= on all routes, bundled league logos, HockeyTech fixes
+Release v2.1.0: ESPN All-Star pseudo-team discovery, per-league color cache fix
 
-Adds boxing via TheSportsDB athlete provider, extends `badge=` to league and single-team routes (previously matchup-only), enables SVG league logos, bundles 11 league logos locally to fix Wikimedia 429 errors, fixes WHL/OHL/QMJHL team resolution by switching to pinned HockeyTech client codes, fixes Regular-weight custom font rendering in event overlays, adds opt-in SOCKS5 proxy support for HockeyTech, and removes the `/xcproxy` route.
+Adds dynamic discovery of ESPN's "All-Star" grouping so leagues with permanent conference/All-Star pseudo-teams (e.g. MLB's AL/NL, NFL's AFC/NFC Pro Bowl) resolve without any per-league hardcoding, filtering out one-off historical rosters and keeping only stable, current pairings. Also fixes the team color cache key to include the league, preventing a color lookup collision when two different leagues' teams share the same ESPN team ID.
