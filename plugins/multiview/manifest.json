@@ -4,8 +4,17 @@
   "description": "Tile multiple Dispatcharr channel streams into multi-view outputs using FFmpeg",
   "author": "sethwv",
   "license": "MIT",
-  "latest_version": "0.4.0",
+  "latest_version": "0.4.1",
   "versions": [
+    {
+      "version": "0.4.1",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.4.1/multiview-0.4.1.zip",
+      "checksum_sha256": "86464ec02384d77e9e0e79d8c35f159a2ad457a12ed7e09069aca90838ad9cd6",
+      "build_timestamp": "2026-07-17T22:26:15Z",
+      "commit_sha": "190c2074cc962e10e890777478bcc44ffdabbbe3",
+      "commit_sha_short": "190c2074",
+      "min_dispatcharr_version": "v0.27.0"
+    },
     {
       "version": "0.4.0",
       "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.4.0/multiview-0.4.0.zip",
@@ -90,12 +99,12 @@
     }
   ],
   "latest": {
-    "version": "0.4.0",
-    "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.4.0/multiview-0.4.0.zip",
-    "checksum_sha256": "6604a55d8d0f60da908159eaef6e37b5b14af43f39441b93483ffce7bad49626",
-    "build_timestamp": "2026-07-17T21:35:57Z",
-    "commit_sha": "a43d47ca48e502e69dfddfa1595ff744c484f805",
-    "commit_sha_short": "a43d47ca",
+    "version": "0.4.1",
+    "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.4.1/multiview-0.4.1.zip",
+    "checksum_sha256": "86464ec02384d77e9e0e79d8c35f159a2ad457a12ed7e09069aca90838ad9cd6",
+    "build_timestamp": "2026-07-17T22:26:15Z",
+    "commit_sha": "190c2074cc962e10e890777478bcc44ffdabbbe3",
+    "commit_sha_short": "190c2074",
     "min_dispatcharr_version": "v0.27.0"
   }
 }
