@@ -1,3 +1,15 @@
-Release v2.1.0: ESPN All-Star pseudo-team discovery, per-league color cache fix
+Add name-mode rendering, team color palettes, Little League Baseball,
+and reliability fixes
 
-Adds dynamic discovery of ESPN's "All-Star" grouping so leagues with permanent conference/All-Star pseudo-teams (e.g. MLB's AL/NL, NFL's AFC/NFC Pro Bowl) resolve without any per-league hardcoding, filtering out one-off historical rosters and keeping only stable, current pairings. Also fixes the team color cache key to include the league, preventing a color lookup collision when two different leagues' teams share the same ESPN team ID.
+Adds two new leagues.json options, `mode: "name"` (render a team's
+name as text instead of its logo, with a per-request `?mode=` override)
+and `teamColors` (a hex palette for deterministically color-coding
+teams that lack per-team color data), and uses both to add a new
+Little League Baseball league. Also fixes several reliability issues:
+ESPN's Akamai WAF blocking datacenter-IP requests with browser-style
+User-Agents (403s on public VPS instances, #149), stale cached MLB
+All-Star team data, ESPN all-star pseudo-team resolution for MLS/Liga
+MX, an out-of-memory crash under concurrent tennis/athlete logo
+requests caused by re-parsing the full ESPN roster on every call
+(#141), and broken ATP/WTA tennis logos (now served from bundled local
+assets instead of remote URLs).

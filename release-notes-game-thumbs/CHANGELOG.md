@@ -1,9 +1,26 @@
-## [2.1.0] - Unreleased
+## [Unreleased]
 
 ### Added
+- New `llb` (Little League Baseball) league.
+- `mode` leagues.json field (and matching `?mode=` query param): set to
+  `"name"` to render each team's name as text instead of its logo, on
+  matchup and single-team thumb/cover/logo endpoints.
+- `teamColors` leagues.json field: an optional hex color palette that
+  deterministically assigns each team a stable color/alternate color,
+  for leagues where every team otherwise shares the same provider color.
 
-- Pseudo-team resolution via ESPN's All-Star group discovery, enabling leagues with permanent conference/All-Star teams (e.g. MLB's AL/NL, NFL's AFC/NFC Pro Bowl) to resolve those teams without per-league configuration
+### Changed
+- ATP and WTA league logos now use bundled local assets instead of
+  remote thesportsdb URLs.
 
 ### Fixed
-
-- Team color cache is now scoped per league, preventing a cached color from one league's team from being applied to a different league's team that happens to share the same ESPN team ID
+- Fixed requests failing with 403 errors on public/VPS-hosted instances
+  due to ESPN's Akamai WAF blocking browser-style User-Agent strings
+  from datacenter IPs (#149).
+- Fixed MLB All-Star team resolution failing due to stale cached team
+  data after a data shape change.
+- Fixed ESPN all-star pseudo-team resolution for MLS and Liga MX.
+- Fixed a crash ("JavaScript heap out of memory") that could occur
+  under concurrent requests to tennis/athlete-based logo routes,
+  caused by repeatedly re-parsing the full ESPN roster cache from disk
+  on every request (#141).
