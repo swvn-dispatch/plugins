@@ -54,12 +54,9 @@ def set_output(key, value):
 
 
 def fetch_bytes(url):
-    """Fetch a URL, authenticated if GH_TOKEN is set.
-
-    All URLs this script fetches are github.com/raw.githubusercontent.com
-    (plugin.json, logos, release assets), so it's safe to always attach the
-    token when present — needed for private plugin repos, where both raw
-    file content and release asset downloads 404 without it.
+    """Fetch a raw.githubusercontent.com URL (plugin.json, logos), authenticated
+    if GH_TOKEN is set — needed for private plugin repos, which 404 without it.
+    Release assets go through `fetch_asset_bytes` instead (see there for why).
     """
     token = os.environ.get("GH_TOKEN", "")
     headers = {"Authorization": f"Bearer {token}"} if token else {}
@@ -79,6 +76,27 @@ def fetch_json(url):
         return json.loads(data)
     except Exception as exc:
         print(f"  Warning: JSON parse failed ({url}): {exc}", flush=True)
+        return None
+
+
+def fetch_asset_bytes(asset):
+    """Download a release asset's bytes.
+
+    `asset["browser_download_url"]` only works for public repos (or a
+    browser session) — for a private repo it 404s even with a valid token.
+    Private-repo assets have to go through the API's asset endpoint
+    (`asset["url"]`) with `Accept: application/octet-stream` instead.
+    """
+    token = os.environ.get("GH_TOKEN", "")
+    headers = {"Accept": "application/octet-stream"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    url = asset["url"]
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as resp:
+            return resp.read()
+    except Exception as exc:
+        print(f"  Warning: asset fetch failed ({url}): {exc}", flush=True)
         return None
 
 
@@ -108,25 +126,46 @@ def plugin_json_from_zip(data):
 
 def process_plugin(repo_entry):
     """
-    Scan a plugin repo's releases and return (slug, meta, versions, dev_entry, logo_bytes).
+    Scan a plugin repo's releases and return
+    (slug, meta, versions, dev_entry, logo_bytes, mirror_files).
     Returns None on fatal failure.
+
+    `mirror_files` is a `{filename: bytes}` map of release zips that need to
+    be re-hosted on this (public) aggregator repo's own manifest branch,
+    because `repo_entry["private"]` is set — a private plugin repo's
+    `browser_download_url` 404s for Dispatcharr's own unauthenticated
+    install/update fetch, even though this script can download it itself via
+    an authenticated API call. `versions`/`dev_entry` `url` fields already
+    point at the mirrored location in that case.
     """
     repo = repo_entry["repo"]
     plugin_json_path = repo_entry.get("plugin_json", "src/plugin.json")
     logo_path = repo_entry.get("logo", "src/logo.png")
     dev_tag = repo_entry.get("dev_tag")
+    is_private = bool(repo_entry.get("private"))
+    mirror_files: dict[str, bytes] = {}
 
     print(f"\n{'='*60}", flush=True)
     print(f"Processing {repo}", flush=True)
 
-    # Fetch plugin.json from default branch
-    default_branch = "main"
-    meta_url = f"{RAW}/{repo}/{default_branch}/{plugin_json_path}"
-    meta = fetch_json(meta_url)
-    if meta is None:
-        # Try dev branch
-        meta_url = f"{RAW}/{repo}/dev/{plugin_json_path}"
-        meta = fetch_json(meta_url)
+    # Ask the API for the repo's actual default branch rather than assuming
+    # "main" (a repo may have renamed/deleted it — as twitcharr-fork did,
+    # making "dev" its only branch — and a hardcoded guess just wastes a
+    # request that 404s on every single run).
+    try:
+        default_branch = gh("api", f"repos/{repo}", "--jq", ".default_branch")
+    except subprocess.CalledProcessError as exc:
+        print(f"  Warning: could not resolve default branch for {repo}: {exc}", flush=True)
+        default_branch = "main"
+
+    # Fetch plugin.json from the default branch, falling back to "dev" if
+    # that's not where it lives (e.g. a repo mid-restructure).
+    branches_to_try = [default_branch] + (["dev"] if default_branch != "dev" else [])
+    meta = None
+    for branch in branches_to_try:
+        meta = fetch_json(f"{RAW}/{repo}/{branch}/{plugin_json_path}")
+        if meta is not None:
+            break
     if meta is None:
         print(f"  ERROR: could not fetch plugin.json – skipping {repo}", flush=True)
         return None
@@ -134,13 +173,14 @@ def process_plugin(repo_entry):
     name = meta.get("name", repo.split("/")[-1])
     slug = name.lower().replace(" ", "_")
     print(f"  slug: {slug}  name: {name}", flush=True)
+    mirror_root = f"{RAW}/{os.environ['REPO']}/manifest/plugins/{slug}"
 
-    # Fetch logo
-    logo_url = f"{RAW}/{repo}/{default_branch}/{logo_path}"
-    logo_bytes = fetch_bytes(logo_url)
-    if logo_bytes is None:
-        logo_url = f"{RAW}/{repo}/dev/{logo_path}"
-        logo_bytes = fetch_bytes(logo_url)
+    # Fetch logo, same branch fallback order
+    logo_bytes = None
+    for branch in branches_to_try:
+        logo_bytes = fetch_bytes(f"{RAW}/{repo}/{branch}/{logo_path}")
+        if logo_bytes is not None:
+            break
 
     # Fetch all releases
     releases = json.loads(gh("api", "--paginate", f"repos/{repo}/releases"))
@@ -164,9 +204,13 @@ def process_plugin(repo_entry):
 
         url = asset["browser_download_url"]
         print(f"  {version}: {url}", flush=True)
-        data = fetch_bytes(url)
+        data = fetch_asset_bytes(asset)
         if data is None:
             continue
+
+        if is_private:
+            mirror_files[asset["name"]] = data
+            url = f"{mirror_root}/{asset['name']}"
 
         sha256 = hashlib.sha256(data).hexdigest()
         pj = plugin_json_from_zip(data)
@@ -205,8 +249,12 @@ def process_plugin(repo_entry):
             if dev_asset:
                 dev_url = dev_asset["browser_download_url"]
                 print(f"  Found: {dev_url}", flush=True)
-                dev_data = fetch_bytes(dev_url)
+                dev_data = fetch_asset_bytes(dev_asset)
                 if dev_data:
+                    if is_private:
+                        mirror_files[dev_asset["name"]] = dev_data
+                        dev_url = f"{mirror_root}/{dev_asset['name']}"
+
                     dev_sha256 = hashlib.sha256(dev_data).hexdigest()
                     dev_pj = plugin_json_from_zip(dev_data)
                     dev_ver_str = dev_pj.get("version") or dev_rel["tag_name"]
@@ -228,7 +276,7 @@ def process_plugin(repo_entry):
         else:
             print(f"  No dev pre-release found.", flush=True)
 
-    return slug, meta, versions, dev_entry, logo_bytes
+    return slug, meta, versions, dev_entry, logo_bytes, mirror_files
 
 
 def main():
@@ -254,7 +302,7 @@ def main():
         if result is None:
             continue
 
-        slug, meta, versions, dev_entry, logo_bytes = result
+        slug, meta, versions, dev_entry, logo_bytes, mirror_files = result
 
         if not versions and not dev_entry:
             print(f"  No releases found for {repo_entry['repo']} – skipping.", flush=True)
@@ -314,6 +362,11 @@ def main():
             print(f"  Logo saved ({len(logo_bytes)} bytes)", flush=True)
         else:
             print(f"  Warning: no logo found for {slug}", flush=True)
+
+        for filename, blob in mirror_files.items():
+            with open(os.path.join(plugin_out, filename), "wb") as f:
+                f.write(blob)
+            print(f"  Mirrored {filename} ({len(blob)} bytes)", flush=True)
 
         stable_count = len(versions)
         print(f"  Done: {stable_count} stable{', 1 dev' if dev_entry else ''}", flush=True)

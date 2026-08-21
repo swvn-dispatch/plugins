@@ -9,13 +9,15 @@
     "repo": "swvn-dispatch/embyfin-stream-cleanup",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
-    "dev_tag": "dev-latest"
+    "dev_tag": "dev-latest",
+    "private": true
   },
   {
     "repo": "swvn-dispatch/disp-ldap",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
-    "dev_tag": "dev-latest"
+    "dev_tag": "dev-latest",
+    "private": true
   },
   {
     "repo": "swvn-dispatch/dispatcharr-multiview",
@@ -27,7 +29,8 @@
     "repo": "swvn-dispatch/twitcharr-fork",
     "plugin_json": "twitcharr/plugin.json",
     "logo": "twitcharr/logo.png",
-    "dev_tag": "dev-latest"
+    "dev_tag": "dev-latest",
+    "private": true
   },
   {
     "repo": "swvn-dispatch/source-switch",

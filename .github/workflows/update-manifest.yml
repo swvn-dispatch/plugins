@@ -55,12 +55,16 @@ jobs:
           # Root manifest
           cp _manifest_out/manifest.json _manifest_wt/manifest.json
 
-          # Per-plugin manifests and logos
+          # Per-plugin manifests, logos, and mirrored zips (private repos only
+          # — see build_combined_manifest.py's `mirror_files`)
           for plugin_dir in _manifest_out/plugins/*/; do
             slug=$(basename "$plugin_dir")
             dest="_manifest_wt/plugins/$slug"
             mkdir -p "$dest"
             cp "$plugin_dir/manifest.json" "$dest/manifest.json"
+            for zip_file in "$plugin_dir"/*.zip; do
+              [ -f "$zip_file" ] && cp "$zip_file" "$dest/"
+            done
             if [ -f "$plugin_dir/logo.png" ]; then
               cp "$plugin_dir/logo.png" "$dest/logo.png"
             fi
