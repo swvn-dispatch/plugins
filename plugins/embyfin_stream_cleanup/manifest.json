@@ -8,7 +8,7 @@
   "versions": [
     {
       "version": "1.3.0",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.3.0/embyfin-stream-cleanup-1.3.0.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.3.0.zip",
       "checksum_sha256": "b4a5b2bd5b43e1e5ee2a24556c4f5dab930e5a64051b8a69778dfc91bf2528cf",
       "build_timestamp": "2026-07-17T21:35:03Z",
       "commit_sha": "66e2a7ce083d720acaa7320137d6389136c38d4e",
@@ -17,7 +17,7 @@
     },
     {
       "version": "1.2.0",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.2.0/embyfin-stream-cleanup-1.2.0.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.2.0.zip",
       "checksum_sha256": "f59ac77a32a4636fae789bc7fe80310584f248723092a6b2ca837e7cd1430140",
       "build_timestamp": "2026-05-15T17:09:43Z",
       "commit_sha": "fde22bfc298efc9ed0ac06a49a6c9f5c00d8708d",
@@ -26,7 +26,7 @@
     },
     {
       "version": "1.1.2",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.1.2/embyfin-stream-cleanup-1.1.2.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.1.2.zip",
       "checksum_sha256": "50473f2ac6ebf5f2fd693d688043c601fdc4f0514f769f3eec6832427f82a3ca",
       "build_timestamp": "2026-05-10T18:22:11Z",
       "commit_sha": "192057cbf85166c7f3b828da6ed5d13619e16c0e",
@@ -35,7 +35,7 @@
     },
     {
       "version": "1.1.1",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.1.1/embyfin-stream-cleanup-1.1.1.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.1.1.zip",
       "checksum_sha256": "e1c3e6d3ecb337d22c26a06c4ca1d4de6cf0c91a828f21194ba0670846be7a4e",
       "build_timestamp": "2026-04-28T18:30:36Z",
       "commit_sha": "e8904fa1b588cbe1f0f24d37f298f0ef0fc0b923",
@@ -44,7 +44,7 @@
     },
     {
       "version": "1.1.0",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.1.0/embyfin-stream-cleanup-1.1.0.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.1.0.zip",
       "checksum_sha256": "2f79e67f7bba7658854636b006fabf88510ba557aaaa44d3ee75fa9db17206c7",
       "build_timestamp": "2026-04-27T15:01:44Z",
       "commit_sha": "ccf8cf2925ed82c5119c21a038578f2ee6b2d34b",
@@ -53,7 +53,7 @@
     },
     {
       "version": "1.0.1",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.0.1/embyfin-stream-cleanup-1.0.1.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.0.1.zip",
       "checksum_sha256": "99852eb56e448b293a3214852152ecd7ee76d44cd6f1e3a446961cd9590b65dc",
       "build_timestamp": "2026-04-18T19:31:38Z",
       "commit_sha": "d9a07a20b261ee378ef390f70b32153cea3474a3",
@@ -62,7 +62,7 @@
     },
     {
       "version": "1.0.0",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.0.0/embyfin-stream-cleanup-1.0.0.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.0.0.zip",
       "checksum_sha256": "41788e08d31e7a3b6ec2e19fa4d385b056557c31d214b50bad4e543aea68bf01",
       "build_timestamp": "2026-04-18T17:30:22Z",
       "commit_sha": "12548e9999f1f776f42bd44f5d18e682a8e3f88c",
@@ -71,7 +71,7 @@
     },
     {
       "version": "1.3.0-dev-8ed6f083",
-      "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/dev-latest/embyfin-stream-cleanup-dev-latest.zip",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-dev-latest.zip",
       "checksum_sha256": "d8b892fae08475775795beca7fa17ae77564ef6f4c87247c979ef7298f04147f",
       "build_timestamp": "2026-08-14T13:18:00Z",
       "prerelease": true,
@@ -82,7 +82,7 @@
   ],
   "latest": {
     "version": "1.3.0",
-    "url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup/releases/download/v1.3.0/embyfin-stream-cleanup-1.3.0.zip",
+    "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/embyfin_stream_cleanup/embyfin-stream-cleanup-1.3.0.zip",
     "checksum_sha256": "b4a5b2bd5b43e1e5ee2a24556c4f5dab930e5a64051b8a69778dfc91bf2528cf",
     "build_timestamp": "2026-07-17T21:35:03Z",
     "commit_sha": "66e2a7ce083d720acaa7320137d6389136c38d4e",
