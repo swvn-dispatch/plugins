@@ -32,7 +32,11 @@ jobs:
         id: build
         env:
           REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
+          # github.token only has read access to this repo. Some plugin repos
+          # in repos.json are private, so this needs a PAT with read access
+          # to those repos too (see the "Notify aggregator" step in each
+          # plugin repo's own release workflow, which uses the same PAT).
+          GH_TOKEN: ${{ secrets.SETH_PAT }}
         run: python3 .github/scripts/build_combined_manifest.py
 
       - name: Push to manifest branch

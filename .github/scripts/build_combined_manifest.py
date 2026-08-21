@@ -54,8 +54,17 @@ def set_output(key, value):
 
 
 def fetch_bytes(url):
+    """Fetch a URL, authenticated if GH_TOKEN is set.
+
+    All URLs this script fetches are github.com/raw.githubusercontent.com
+    (plugin.json, logos, release assets), so it's safe to always attach the
+    token when present — needed for private plugin repos, where both raw
+    file content and release asset downloads 404 without it.
+    """
+    token = os.environ.get("GH_TOKEN", "")
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
     try:
-        with urllib.request.urlopen(url, timeout=30) as resp:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as resp:
             return resp.read()
     except Exception as exc:
         print(f"  Warning: fetch failed ({url}): {exc}", flush=True)
