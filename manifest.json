@@ -64,7 +64,7 @@
     {
       "slug": "twitcharr",
       "name": "Twitcharr",
-      "description": "A polished Twitch Live TV lineup for Dispatcharr. Add channels or discovery rules, then sync channels, streams and XMLTV guide data using anonymous Twitch metadata only. No OAuth, Client ID, Client Secret or Twitch sign-in required.",
+      "description": "A polished Twitch Live TV lineup for Dispatcharr. Add channels or discovery rules, then sync channels, streams and XMLTV guide data using anonymous Twitch metadata. Optionally sign in to add channels you follow.",
       "author": "eliasbruno124",
       "license": "MIT",
       "manifest_url": "plugins/twitcharr/manifest.json",
