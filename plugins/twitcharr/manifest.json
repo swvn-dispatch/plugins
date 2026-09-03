@@ -6,13 +6,13 @@
   "license": "MIT",
   "versions": [
     {
-      "version": "0.0.0-dev-11bdc942",
+      "version": "0.0.0-dev-3060a237",
       "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/twitcharr/twitcharr-dev-latest.zip",
-      "checksum_sha256": "db02b3e2fdbcd16e314d6d4c537ef9c0639ea168853466b10ace7f531f5cc006",
-      "build_timestamp": "2026-09-03T17:26:39Z",
+      "checksum_sha256": "c1f33590503d7ae3a56f2835cc0d038dcb96b16108781a10e87aff3adf19ada4",
+      "build_timestamp": "2026-09-03T17:37:25Z",
       "prerelease": true,
-      "commit_sha": "11bdc942b9fd4d05a5584d7817a8fc31db203a57",
-      "commit_sha_short": "11bdc942"
+      "commit_sha": "3060a237a1ab007bc68b5501b70617cc6f082076",
+      "commit_sha_short": "3060a237"
     }
   ]
 }
