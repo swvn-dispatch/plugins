@@ -64,7 +64,7 @@
     {
       "slug": "twitcharr",
       "name": "Twitcharr",
-      "description": "A polished Twitch Live TV lineup for Dispatcharr. Add channels or discovery rules, then sync channels, streams and XMLTV guide data using anonymous Twitch metadata. Optionally sign in to add channels you follow.",
+      "description": "A polished live-TV lineup for Dispatcharr. Add Twitch, YouTube, or Kick channels and Twitch discovery rules, then sync channels, streams and XMLTV guide data.",
       "author": "eliasbruno124",
       "license": "MIT",
       "manifest_url": "plugins/twitcharr/manifest.json",

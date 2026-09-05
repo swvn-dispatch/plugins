@@ -1,18 +1,18 @@
 {
   "slug": "twitcharr",
   "name": "Twitcharr",
-  "description": "A polished Twitch Live TV lineup for Dispatcharr. Add channels or discovery rules, then sync channels, streams and XMLTV guide data using anonymous Twitch metadata. Optionally sign in to add channels you follow.",
+  "description": "A polished live-TV lineup for Dispatcharr. Add Twitch, YouTube, or Kick channels and Twitch discovery rules, then sync channels, streams and XMLTV guide data.",
   "author": "eliasbruno124",
   "license": "MIT",
   "versions": [
     {
-      "version": "0.0.0-dev-c8744682",
+      "version": "0.0.0-dev-fbca14c0",
       "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/twitcharr/twitcharr-dev-latest.zip",
-      "checksum_sha256": "79beb6dd880cc8843404975311e616f6d20c26e043fc4db491d33337f8d863e4",
-      "build_timestamp": "2026-09-03T17:44:20Z",
+      "checksum_sha256": "ee00b553e6e4fe866be349fd331afc81c84adfe2f76013145830c3395659b96c",
+      "build_timestamp": "2026-09-05T15:51:56Z",
       "prerelease": true,
-      "commit_sha": "c87446825e791e4ea9fa9afe7899911d4dcd8ec9",
-      "commit_sha_short": "c8744682"
+      "commit_sha": "fbca14c0e88f36d4bf832bb1f91913edd005a260",
+      "commit_sha_short": "fbca14c0"
     }
   ]
 }
