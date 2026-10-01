@@ -1,15 +1,11 @@
 ## [Unreleased]
 
 ### Added
-- Stadium-background matchup styles 10 through 13, with venue details and optional team records (#144 by @dexdeadly).
-- Eredivisie, Eerste Divisie, and Greater Ontario Hockey League support.
-- NASCAR Cup and NASCAR Cup Series league aliases.
-- Opt-in Prometheus metrics at `/metrics` when `METRICS_ENABLED=true`.
-- Built-in Teamarr league overlays, including configured light and dark league artwork.
 
-### Changed
-- Updated UEFA Europa Conference League resolution to use ESPN's current slug and added `UECL` aliases (#151 by @DatGuy1).
+- Allow a league's short code, ESPN slug, or full name to be rendered as a team in raw data, thumbnail, and matchup logo endpoints.
+- Support up to four badge overlays per image, including ranking badges and corner placement controls. (#161 by @lpukatch)
 
 ### Fixed
-- Removed detected white backgrounds from team and league logos across image endpoints. Set `DISABLE_LOGO_BACKGROUND_REMOVAL=true` to disable this processing.
-- Resolved AFL club names that include a trailing `Football Club` suffix.
+
+- Use a contrasting charcoal background when the WNBA is rendered as a league team.
+- Correct the bottom-right corner of badge pills. (#161 by @lpukatch)

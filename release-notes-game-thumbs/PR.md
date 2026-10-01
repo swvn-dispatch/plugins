@@ -1,3 +1,3 @@
-Add stadium styles, league coverage, and logo cleanup
+feat: add league teams and enhanced badge overlays
 
-Adds stadium-background matchup styles with venue details and optional records, new Dutch and Greater Ontario Hockey League coverage, NASCAR aliases, and Teamarr league overlays. The release also corrects UEFA Europa Conference League and AFL team resolution, removes detected white logo backgrounds across image endpoints, and adds optional Prometheus metrics for operators.
+League branding can now be rendered as a team across image and raw data endpoints, while badge overlays support rankings, multiple badges, and corner placement. WNBA league-team images now use a contrasting background for clearer branding.

@@ -1,7 +1,2 @@
-**game-thumbs v2.3.0**
-
-- New stadium-background matchup styles 10 through 13, including venue details and optional team records
-- Added Eredivisie, Eerste Divisie, and Greater Ontario Hockey League support
-- Game Thumbs can now load compatible Teamarr leagues and their configured artwork
-- Team and league logos now have detected white backgrounds removed automatically
-- Fixed UEFA Europa Conference League and AFL club-name resolution
+- Render league branding as a team in thumbnails, matchup logos, and raw data responses.
+- Add up to four image badges, with ranking badges and optional corner placement. (#161 by @lpukatch)
