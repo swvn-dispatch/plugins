@@ -126,13 +126,13 @@
       "commit_sha_short": "6b2c98fa"
     },
     {
-      "version": "3.0.1-dev-2d8bd771",
+      "version": "3.1.0-dev-bb366bfb",
       "url": "https://github.com/swvn-dispatch/dispatcharr-exporter/releases/download/dev-latest/dispatcharr-exporter-dev-latest.zip",
-      "checksum_sha256": "e3027cc3080269cc71bb61e3be41f4a69f5ef206471959c4f789824c2b9366e3",
-      "build_timestamp": "2026-07-18T17:18:01Z",
+      "checksum_sha256": "43b94013947179570aad0df6a7b4b3a8bdf140d9a27fd7c1d88a5e0baaed11c4",
+      "build_timestamp": "2026-10-26T13:56:14Z",
       "prerelease": true,
-      "commit_sha": "1cafc35792fbf6aa043e3da7c0d5a9997b7d49bb",
-      "commit_sha_short": "1cafc357",
+      "commit_sha": "c9fcd50ed56ca15cd4222813329aaef961ee4483",
+      "commit_sha_short": "c9fcd50e",
       "min_dispatcharr_version": "v0.22.0"
     }
   ],
