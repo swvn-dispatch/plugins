@@ -6,10 +6,10 @@
   "license": "MIT",
   "versions": [
     {
-      "version": "0.0.0-dev-f0388695",
+      "version": "0.0.0-dev-c7b4383f",
       "url": "https://github.com/swvn-dispatch/source-switch/releases/download/dev-latest/source-switch-dev-latest.zip",
-      "checksum_sha256": "46a8fe270548210e6788a130ea1b95f0e16c88015aa9190b265e758fd31f0d2f",
-      "build_timestamp": "2026-10-26T20:50:36Z",
+      "checksum_sha256": "261d0d93c405e3a465241af45eb604621246cc91c9ca4618a3bfe21d5f211dfc",
+      "build_timestamp": "2026-10-27T15:45:27Z",
       "prerelease": true,
       "commit_sha": "c8c1dbab20956171cf6b260a58d1231bbf4d546c",
       "commit_sha_short": "c8c1dbab",
