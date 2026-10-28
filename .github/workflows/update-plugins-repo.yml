@@ -116,7 +116,6 @@ jobs:
         if: steps.config.outputs.slug != ''
         env:
           REPO: ${{ steps.source.outputs.repo }}
-          CURRENT_VERSION: ${{ steps.current.outputs.current_version }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             RELEASE=$(gh api "repos/$REPO/releases?per_page=100" --jq '
@@ -182,7 +181,6 @@ jobs:
           ASSET_NAME: ${{ steps.release.outputs.asset_name }}
           ASSET_URL: ${{ steps.release.outputs.asset_url }}
           COMMIT_SHORT: ${{ steps.release.outputs.commit_short }}
-          CURRENT_VERSION: ${{ steps.current.outputs.current_version }}
         run: |
           mkdir -p /tmp/download /tmp/extract /tmp/registry-plugin
           gh release download "$TAG" -R "$REPO" -p "$ASSET_NAME" -D /tmp/download
@@ -195,21 +193,12 @@ jobs:
           fi
 
           if [ "$MODE" = "dev" ]; then
-            if ! [[ "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "::error::A dev prerelease requires a stable version in the registry; found '$CURRENT_VERSION'."
-              exit 1
-            fi
             VERSION=$(jq -r '.version' "$BUNDLED_PLUGIN_JSON")
-            VERSION_PREFIX="${CURRENT_VERSION}-dev-"
-            if [[ "$VERSION" != "$VERSION_PREFIX"* ]]; then
-              echo "::error::Dev ZIP has version '$VERSION'; expected a prerelease based on '$CURRENT_VERSION'."
+            if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-dev-([0-9a-f]{8})$ ]]; then
+              echo "::error::Dev ZIP has invalid version '$VERSION'; expected X.Y.Z-dev-<8-character lowercase commit SHA>."
               exit 1
             fi
-            SUBMISSION_COMMIT_SHORT=${VERSION#"$VERSION_PREFIX"}
-            if ! [[ "$SUBMISSION_COMMIT_SHORT" =~ ^[0-9a-f]{8}$ ]]; then
-              echo "::error::Dev ZIP has version '$VERSION'; its dev suffix must be an 8-character lowercase commit SHA."
-              exit 1
-            fi
+            SUBMISSION_COMMIT_SHORT=${BASH_REMATCH[1]}
             if [ "$TAG" != "v$VERSION" ] || [ "$SUBMISSION_COMMIT_SHORT" != "$COMMIT_SHORT" ]; then
               echo "::error::Dev release tag '$TAG' does not match ZIP version '$VERSION' and commit '$COMMIT_SHORT'."
               exit 1
