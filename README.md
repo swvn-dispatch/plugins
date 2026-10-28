@@ -104,6 +104,12 @@ For each entry in `repos.json` the script:
 
 If a plugin has no stable releases yet, all `latest_*` fields are omitted from the root manifest entry — only the dev build appears in the per-plugin manifest.
 
+### Community registry submissions
+
+`Update Plugins Repo` submits tracked releases to the Dispatcharr community registry as [external plugins](https://github.com/Dispatcharr/Plugins/blob/main/CONTRIBUTING.md#external-plugin). Its generated registry directory contains only `plugin.json` and `logo.png`; source files and READMEs are removed during the first migrated submission.
+
+A `plugin-updated` repository dispatch submits the latest stable release. To submit a dev prerelease deliberately, run the workflow from the Actions tab and enter the tracked plugin slug or source repository short name. The workflow reads the configured `dev_tag`, normally `dev-latest`, and verifies the ZIP's embedded version is `<registry-stable-version>-dev-<shortsha>` before opening a PR. The upstream dev artifact remains mutable, so run the workflow again after the dev tag advances.
+
 ### Configuration files
 
 **`repos.json`** — one entry per plugin repo:

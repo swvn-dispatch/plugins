@@ -1,22 +1,21 @@
 name: Update Plugins Repo
 
-# When a tracked plugin repo publishes a new stable release, this workflow:
-#   1. Downloads and extracts the release ZIP
-#   2. Runs CodeQL (security-extended) on the plugin source
-#   3. Opens or updates a PR against the community Plugins repo (vars.PLUGINS_REPO)
-#      from a branch in the sethwv/Plugins fork named auto/bump/SLUG-VERSION
+# Submits tracked plugin releases to the community registry as external plugins.
+# Stable releases arrive through repository_dispatch. A manual dispatch selects a
+# tracked plugin and submits its current dev prerelease.
 
 on:
   repository_dispatch:
     types: [plugin-updated]
   workflow_dispatch:
     inputs:
-      repo:
-        description: 'Source repo (owner/repo, must be in repos.json)'
+      plugin:
+        description: 'Tracked plugin slug or source repository short name'
         required: true
+        type: string
 
 concurrency:
-  group: update-plugins-repo-${{ github.event.client_payload.repo || inputs.repo }}
+  group: update-plugins-repo-${{ github.event.client_payload.repo || inputs.plugin }}
   cancel-in-progress: true
 
 jobs:
@@ -24,8 +23,6 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      security-events: write
-      actions: read
       contents: read
 
     env:
@@ -38,304 +35,314 @@ jobs:
 
       - name: Resolve source repo
         id: source
+        env:
+          REQUESTED_PLUGIN: ${{ inputs.plugin }}
         run: |
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             REPO="${{ github.event.client_payload.repo }}"
           else
-            REPO="${{ inputs.repo }}"
+            REPO=""
+            while IFS= read -r ENTRY; do
+              CANDIDATE_REPO=$(echo "$ENTRY" | jq -r '.repo')
+              REPO_SHORT=${CANDIDATE_REPO##*/}
+              PLUGIN_JSON_PATH=$(echo "$ENTRY" | jq -r '.plugin_json')
+              PLUGIN_JSON=$(gh api "repos/$CANDIDATE_REPO/contents/$PLUGIN_JSON_PATH" --jq '.content' 2>/dev/null | base64 -d 2>/dev/null || true)
+              PLUGIN_NAME=$(echo "$PLUGIN_JSON" | jq -r '.name // empty' 2>/dev/null || true)
+              SLUG=$(echo "$PLUGIN_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
+              if [ "$REQUESTED_PLUGIN" = "$REPO_SHORT" ] || [ "$REQUESTED_PLUGIN" = "$SLUG" ]; then
+                if [ -n "$REPO" ]; then
+                  echo "::error::Plugin '$REQUESTED_PLUGIN' matches more than one tracked repository."
+                  exit 1
+                fi
+                REPO="$CANDIDATE_REPO"
+              fi
+            done < <(jq -c '.[]' repos.json)
           fi
 
           if [ -z "$REPO" ]; then
-            echo "::error::No source repo provided."
+            echo "::error::No tracked plugin matched '${REQUESTED_PLUGIN:-repository dispatch payload}'. Use a plugin slug or repository short name from repos.json."
             exit 1
           fi
 
           echo "repo=$REPO" >> "$GITHUB_OUTPUT"
 
-      - name: Validate repo is tracked and extract config
+      - name: Validate repo and extract config
         id: config
         env:
           REPO: ${{ steps.source.outputs.repo }}
         run: |
-          ENTRY=$(jq -r --arg repo "$REPO" '.[] | select(.repo == $repo)' repos.json)
+          ENTRY=$(jq -c --arg repo "$REPO" '.[] | select(.repo == $repo)' repos.json)
           if [ -z "$ENTRY" ]; then
-            echo "::warning::Repo '$REPO' is not tracked in repos.json. Skipping."
+            echo "::notice::Repo '$REPO' is not tracked in repos.json. Skipping."
+            echo "tracked=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # A plugin repo can opt out of upstream (community Plugins repo) submission
-          # by setting "never_submit_upstream": true in its own
-          # .github/workflows/manifest-config.json. Missing file/field defaults to false.
           MANIFEST_CONFIG=$(gh api "repos/$REPO/contents/.github/workflows/manifest-config.json" --jq '.content' 2>/dev/null | base64 -d 2>/dev/null || echo '{}')
           NEVER_SUBMIT=$(echo "$MANIFEST_CONFIG" | jq -r '.never_submit_upstream // false' 2>/dev/null || echo false)
-
           if [ "$NEVER_SUBMIT" = "true" ]; then
-            echo "::notice::Repo '$REPO' has never_submit_upstream set in manifest-config.json. Skipping upstream submission."
+            echo "::notice::Repo '$REPO' has never_submit_upstream set. Skipping upstream submission."
             echo "opted_out=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           PLUGIN_JSON_PATH=$(echo "$ENTRY" | jq -r '.plugin_json')
-          # Derive slug from plugin.json name field:
-          #   "Embyfin Stream Cleanup" -> embyfin-stream-cleanup
           PLUGIN_JSON=$(gh api "repos/$REPO/contents/$PLUGIN_JSON_PATH" --jq '.content' | base64 -d)
           PLUGIN_NAME=$(echo "$PLUGIN_JSON" | jq -r '.name')
           SLUG=$(echo "$PLUGIN_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
 
+          echo "tracked=true" >> "$GITHUB_OUTPUT"
           echo "opted_out=false" >> "$GITHUB_OUTPUT"
           echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "logo_path=$(echo "$ENTRY" | jq -r '.logo // empty')" >> "$GITHUB_OUTPUT"
+          echo "dev_tag=$(echo "$ENTRY" | jq -r '.dev_tag // empty')" >> "$GITHUB_OUTPUT"
 
-      - name: Get latest stable release
-        id: release
-        if: steps.config.outputs.slug != ''
-        env:
-          REPO: ${{ steps.source.outputs.repo }}
-        run: |
-          RELEASE=$(gh api "repos/$REPO/releases/latest" 2>/dev/null || true)
-          if [ -z "$RELEASE" ] || echo "$RELEASE" | jq -e '.message == "Not Found"' > /dev/null 2>&1; then
-            echo "::warning::No stable release found for '$REPO'. Skipping."
-            exit 0
-          fi
-
-          TAG=$(echo "$RELEASE" | jq -r '.tag_name')
-          VERSION=$(echo "$TAG" | sed 's/^v//')
-          RELEASE_URL=$(echo "$RELEASE" | jq -r '.html_url')
-
-          echo "tag=$TAG"               >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION"       >> "$GITHUB_OUTPUT"
-          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
-
-      - name: Get current version in Plugins repo
+      - name: Get current registry version
         id: current
-        if: steps.release.outputs.tag != ''
+        if: steps.config.outputs.slug != ''
         env:
           SLUG: ${{ steps.config.outputs.slug }}
         run: |
           if ! RESPONSE=$(gh api "repos/$PLUGINS_REPO/contents/plugins/$SLUG/plugin.json" 2>/dev/null); then
             echo "current_version=0.0.0" >> "$GITHUB_OUTPUT"
-            echo "is_new_plugin=true"    >> "$GITHUB_OUTPUT"
+            echo "is_new_plugin=true" >> "$GITHUB_OUTPUT"
           else
             CURRENT=$(echo "$RESPONSE" | jq -r '.content' | base64 -d | jq -r '.version')
             echo "current_version=$CURRENT" >> "$GITHUB_OUTPUT"
-            echo "is_new_plugin=false"       >> "$GITHUB_OUTPUT"
+            echo "is_new_plugin=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Select source release
+        id: release
+        if: steps.config.outputs.slug != ''
+        env:
+          REPO: ${{ steps.source.outputs.repo }}
+          DEV_TAG: ${{ steps.config.outputs.dev_tag }}
+          CURRENT_VERSION: ${{ steps.current.outputs.current_version }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -z "$DEV_TAG" ]; then
+              echo "::error::No dev_tag is configured for '$REPO'."
+              exit 1
+            fi
+            RELEASE=$(gh api "repos/$REPO/releases/tags/$DEV_TAG" 2>/dev/null || true)
+            if [ -z "$RELEASE" ] || ! echo "$RELEASE" | jq -e '.prerelease == true and .draft == false' >/dev/null; then
+              echo "::error::No published prerelease tagged '$DEV_TAG' was found for '$REPO'."
+              exit 1
+            fi
+            MODE=dev
+            TAG=$DEV_TAG
+            VERSION=""
+          else
+            RELEASE=$(gh api "repos/$REPO/releases/latest" 2>/dev/null || true)
+            if [ -z "$RELEASE" ] || echo "$RELEASE" | jq -e '.message == "Not Found"' >/dev/null 2>&1; then
+              echo "::notice::No stable release found for '$REPO'. Skipping."
+              exit 0
+            fi
+            MODE=stable
+            TAG=$(echo "$RELEASE" | jq -r '.tag_name')
+            VERSION=${TAG#v}
+          fi
+
+          ASSET=$(echo "$RELEASE" | jq -c '[.assets[] | select(.name | endswith(".zip"))] | if length == 1 then .[0] else empty end')
+          if [ -z "$ASSET" ]; then
+            echo "::error::Release '$TAG' must have exactly one ZIP asset."
+            exit 1
+          fi
+
+          ASSET_NAME=$(echo "$ASSET" | jq -r '.name')
+          ASSET_URL=$(echo "$ASSET" | jq -r '.browser_download_url')
+          RELEASE_URL=$(echo "$RELEASE" | jq -r '.html_url')
+          COMMIT_SHA=$(gh api "repos/$REPO/commits/$TAG" --jq '.sha')
+
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "asset_name=$ASSET_NAME" >> "$GITHUB_OUTPUT"
+          echo "asset_url=$ASSET_URL" >> "$GITHUB_OUTPUT"
+          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$COMMIT_SHA" >> "$GITHUB_OUTPUT"
+          echo "commit_short=${COMMIT_SHA:0:8}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare external plugin metadata
+        id: prepare
+        if: steps.release.outputs.tag != ''
+        env:
+          REPO: ${{ steps.source.outputs.repo }}
+          SLUG: ${{ steps.config.outputs.slug }}
+          LOGO_PATH: ${{ steps.config.outputs.logo_path }}
+          MODE: ${{ steps.release.outputs.mode }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+          ASSET_NAME: ${{ steps.release.outputs.asset_name }}
+          ASSET_URL: ${{ steps.release.outputs.asset_url }}
+          COMMIT_SHORT: ${{ steps.release.outputs.commit_short }}
+          CURRENT_VERSION: ${{ steps.current.outputs.current_version }}
+        run: |
+          mkdir -p /tmp/download /tmp/extract /tmp/registry-plugin
+          gh release download "$TAG" -R "$REPO" -p "$ASSET_NAME" -D /tmp/download
+          ZIP_FILE="/tmp/download/$ASSET_NAME"
+          unzip -q "$ZIP_FILE" -d /tmp/extract
+          BUNDLED_PLUGIN_JSON=$(find /tmp/extract -maxdepth 2 -name plugin.json -print -quit)
+          if [ -z "$BUNDLED_PLUGIN_JSON" ]; then
+            echo "::error::No plugin.json found inside release ZIP."
+            exit 1
+          fi
+
+          if [ "$MODE" = "dev" ]; then
+            if ! [[ "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::A dev prerelease requires a stable version in the registry; found '$CURRENT_VERSION'."
+              exit 1
+            fi
+            VERSION=$(jq -r '.version' "$BUNDLED_PLUGIN_JSON")
+            EXPECTED_VERSION="${CURRENT_VERSION}-dev-${COMMIT_SHORT}"
+            if [ "$VERSION" != "$EXPECTED_VERSION" ]; then
+              echo "::error::Dev ZIP has version '$VERSION'; expected '$EXPECTED_VERSION'. Publish an aligned dev prerelease first."
+              exit 1
+            fi
+            SOURCE_URL="${ASSET_URL}?version={version}"
+          else
+            if [[ "$ASSET_URL" != *"/download/$TAG/"* ]] || [[ "$ASSET_NAME" != *"$VERSION"* ]]; then
+              echo "::error::Cannot create a versioned external source URL from '$ASSET_URL'."
+              exit 1
+            fi
+            SOURCE_URL=${ASSET_URL/"/download/$TAG/"/"/download/v{version}/"}
+            SOURCE_URL=${SOURCE_URL//"$VERSION"/"{version}"}
+          fi
+
+          RESOLVED_URL=${SOURCE_URL//\{version\}/$VERSION}
+          if ! curl --fail --location --silent --show-error --output /dev/null "$RESOLVED_URL"; then
+            echo "::error::External source URL is not reachable: $RESOLVED_URL"
+            exit 1
+          fi
+
+          jq \
+            --arg version "$VERSION" \
+            --arg repo_url "https://github.com/$REPO" \
+            --arg source_url "$SOURCE_URL" \
+            '.version = $version | .source_type = "external" | .repo_url = $repo_url | .source_url = $source_url | del(.prerelease)' \
+            "$BUNDLED_PLUGIN_JSON" > /tmp/registry-plugin/plugin.json
+
+          if [ -z "$LOGO_PATH" ]; then
+            echo "::error::No logo path is configured for '$REPO'."
+            exit 1
+          fi
+          gh api "repos/$REPO/contents/$LOGO_PATH" --jq '.content' | base64 -d > /tmp/registry-plugin/logo.png
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "source_url=$SOURCE_URL" >> "$GITHUB_OUTPUT"
 
       - name: Check if update is needed
         id: check
-        if: steps.release.outputs.tag != ''
+        if: steps.prepare.outputs.version != ''
         env:
-          NEW_VERSION: ${{ steps.release.outputs.version }}
+          NEW_VERSION: ${{ steps.prepare.outputs.version }}
           CURRENT_VERSION: ${{ steps.current.outputs.current_version }}
           SLUG: ${{ steps.config.outputs.slug }}
         run: |
-          echo "Current version in Plugins repo : $CURRENT_VERSION"
-          echo "Latest stable release            : $NEW_VERSION"
-
           if [ "$NEW_VERSION" = "$CURRENT_VERSION" ]; then
             echo "::notice::Plugin '$SLUG' is already at v$NEW_VERSION in Plugins repo. Skipping."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Check for an existing open PR for this slug — capture number and head branch
           OPEN_PR_JSON=$(gh pr list \
             --repo "$PLUGINS_REPO" \
             --state open \
-            --search "is:open is:pr [${SLUG}] in:title" \
+            --search "is:open is:pr [${SLUG}] Update to v${NEW_VERSION} in:title" \
             --json number,headRefName \
             --jq '.[0] // empty')
-
           if [ -n "$OPEN_PR_JSON" ]; then
-            OPEN_PR=$(echo "$OPEN_PR_JSON" | jq -r '.number')
-            OPEN_PR_BRANCH=$(echo "$OPEN_PR_JSON" | jq -r '.headRefName')
-            echo "::notice::Open PR #$OPEN_PR already exists for '$SLUG'. Will update."
-            echo "existing_pr=$OPEN_PR"               >> "$GITHUB_OUTPUT"
-            echo "existing_pr_branch=$OPEN_PR_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "existing_pr=$(echo "$OPEN_PR_JSON" | jq -r '.number')" >> "$GITHUB_OUTPUT"
+            echo "existing_pr_branch=$(echo "$OPEN_PR_JSON" | jq -r '.headRefName')" >> "$GITHUB_OUTPUT"
           fi
-
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
-      - name: Download and extract release ZIP
-        id: extract
-        if: steps.check.outputs.skip == 'false'
-        env:
-          REPO: ${{ steps.source.outputs.repo }}
-          TAG: ${{ steps.release.outputs.tag }}
-        run: |
-          mkdir -p /tmp/download /tmp/extract
-
-          gh release download "$TAG" -R "$REPO" -p '*.zip' -D /tmp/download
-
-          ZIP_FILE=$(ls /tmp/download/*.zip 2>/dev/null | head -1)
-          if [ -z "$ZIP_FILE" ]; then
-            echo "::error::No .zip asset found in release $TAG of $REPO."
-            exit 1
-          fi
-
-          unzip -q "$ZIP_FILE" -d /tmp/extract
-
-          # Locate the plugin.json inside the ZIP (handles any internal dir name)
-          PLUGIN_JSON=$(find /tmp/extract -name plugin.json -maxdepth 2 | head -1)
-          if [ -z "$PLUGIN_JSON" ]; then
-            echo "::error::No plugin.json found inside release ZIP."
-            exit 1
-          fi
-
-          CONTENT_DIR=$(dirname "$PLUGIN_JSON")
-          echo "content_dir=$CONTENT_DIR" >> "$GITHUB_OUTPUT"
-
-      - name: Stage plugin source for CodeQL
-        if: steps.check.outputs.skip == 'false'
-        env:
-          CONTENT_DIR: ${{ steps.extract.outputs.content_dir }}
-        run: |
-          rm -rf plugin-source
-          mkdir -p plugin-source
-          cp -r "$CONTENT_DIR"/. plugin-source/
-
-      - name: Initialize CodeQL
-        if: steps.check.outputs.skip == 'false'
-        uses: github/codeql-action/init@v4
-        with:
-          languages: python
-          queries: security-extended
-          config: |
-            paths:
-              - plugin-source
-
-      - name: Analyze with CodeQL
-        id: codeql_analyze
-        if: steps.check.outputs.skip == 'false'
-        uses: github/codeql-action/analyze@v4
-        with:
-          output: /tmp/codeql-results
-          upload: never
-
-      - name: Check CodeQL results
-        id: codeql_check
-        if: steps.check.outputs.skip == 'false'
-        env:
-          SLUG: ${{ steps.config.outputs.slug }}
-        run: |
-          SARIF=$(ls /tmp/codeql-results/*.sarif 2>/dev/null | head -1)
-          if [ -z "$SARIF" ]; then
-            echo "::warning::No CodeQL SARIF output found — treating as passed."
-            echo "codeql_passed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          RESULTS=$(jq '[.runs[].results // [] | .[]] | length' "$SARIF")
-          echo "CodeQL security-extended results for '$SLUG': $RESULTS issue(s)"
-
-          if [ "$RESULTS" -gt 0 ]; then
-            echo "::error::CodeQL found $RESULTS security issue(s) in '$SLUG'. Skipping PR."
-            jq -r '.runs[].results[] | "  - \(.ruleId): \(.message.text) (\(.locations[0].physicalLocation.artifactLocation.uri):\(.locations[0].physicalLocation.region.startLine))"' "$SARIF" || true
-            echo "codeql_passed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "::notice::CodeQL passed — no security-extended issues found."
-            echo "codeql_passed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Generate release notes
-        id: notes
-        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
+        if: steps.check.outputs.skip == 'false'
         env:
-          VERSION: ${{ steps.release.outputs.version }}
+          MODE: ${{ steps.release.outputs.mode }}
+          VERSION: ${{ steps.prepare.outputs.version }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
+          COMMIT_SHORT: ${{ steps.release.outputs.commit_short }}
         run: |
           mkdir -p /tmp/release-notes
-          printf 'See the full changelog at %s\n' "$RELEASE_URL" > /tmp/release-notes/HIGHLIGHTS.md
-          printf 'Update to v%s\n\nSee release notes: %s\n' "$VERSION" "$RELEASE_URL" > /tmp/release-notes/PR.md
+          if [ "$MODE" = "dev" ]; then
+            printf 'Update to v%s\n\nManual dev prerelease from commit `%s`.\nSee source release: %s\n' "$VERSION" "$COMMIT_SHORT" "$RELEASE_URL" > /tmp/release-notes/PR.md
+          else
+            printf 'See the full changelog at %s\n' "$RELEASE_URL" > /tmp/release-notes/HIGHLIGHTS.md
+            printf 'Update to v%s\n\nSee release notes: %s\n' "$VERSION" "$RELEASE_URL" > /tmp/release-notes/PR.md
+          fi
 
       - name: Fork and clone Plugins repo
         id: fork
-        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
+        if: steps.check.outputs.skip == 'false'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
-          VERSION: ${{ steps.release.outputs.version }}
+          VERSION: ${{ steps.prepare.outputs.version }}
           EXISTING_PR_BRANCH: ${{ steps.check.outputs.existing_pr_branch }}
         run: |
-          # Reuse the existing PR's head branch when updating; otherwise create a new one
           if [ -n "$EXISTING_PR_BRANCH" ]; then
             BRANCH="$EXISTING_PR_BRANCH"
           else
             BRANCH="auto/bump/${SLUG}-${VERSION}"
           fi
-
-          # Fork is idempotent - reuses existing fork
           gh repo fork "$PLUGINS_REPO"
-
           FORK_OWNER=$(gh api user --jq '.login')
-          # Get the actual fork name - may differ from upstream if there's a naming conflict
           PLUGINS_REPO_NAME=$(gh api "repos/$PLUGINS_REPO/forks" --jq ".[] | select(.owner.login == \"$FORK_OWNER\") | .name")
-
           git clone "https://github.com/${FORK_OWNER}/${PLUGINS_REPO_NAME}.git"
           cd "$PLUGINS_REPO_NAME"
           git remote add upstream "https://github.com/${PLUGINS_REPO}.git"
-
           git fetch upstream
           git checkout -B "$BRANCH" upstream/main
-
-          echo "branch=$BRANCH"              >> "$GITHUB_OUTPUT"
-          echo "fork_owner=$FORK_OWNER"      >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "fork_owner=$FORK_OWNER" >> "$GITHUB_OUTPUT"
           echo "repo_dir=$PLUGINS_REPO_NAME" >> "$GITHUB_OUTPUT"
 
-      - name: Update plugin directory
-        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
+      - name: Update external plugin directory
+        if: steps.check.outputs.skip == 'false'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
-          CONTENT_DIR: ${{ steps.extract.outputs.content_dir }}
         run: |
           cd "${{ steps.fork.outputs.repo_dir }}"
-
           rm -rf "plugins/$SLUG"
           mkdir -p "plugins/$SLUG"
-          cp -r "$CONTENT_DIR"/. "plugins/$SLUG/"
-
-          git add "plugins/$SLUG"
+          cp /tmp/registry-plugin/plugin.json "plugins/$SLUG/plugin.json"
+          cp /tmp/registry-plugin/logo.png "plugins/$SLUG/logo.png"
+          git add -A "plugins/$SLUG"
 
       - name: Commit and push
-        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
+        if: steps.check.outputs.skip == 'false'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
-          VERSION: ${{ steps.release.outputs.version }}
+          VERSION: ${{ steps.prepare.outputs.version }}
           BRANCH: ${{ steps.fork.outputs.branch }}
           FORK_OWNER: ${{ steps.fork.outputs.fork_owner }}
         run: |
           cd "${{ steps.fork.outputs.repo_dir }}"
-
-          git config user.name  "sethwv"
+          git config user.name "sethwv"
           git config user.email "sethwv@users.noreply.github.com"
-
           PR_TITLE=$(head -1 /tmp/release-notes/PR.md)
-          # Lines 3+ as commit body (skip blank line 2)
           PR_BODY=$(tail -n +3 /tmp/release-notes/PR.md)
-
-          COMMIT_MSG="[${SLUG}] ${PR_TITLE}"
-
-          git commit -m "$COMMIT_MSG" -m "$PR_BODY"
-
-          # Push to fork using PAT for attribution
+          git commit -m "[${SLUG}] ${PR_TITLE}" -m "$PR_BODY"
           git remote set-url origin "https://x-access-token:${{ secrets.SETH_PAT }}@github.com/${FORK_OWNER}/${{ steps.fork.outputs.repo_dir }}.git"
           git push -f origin "$BRANCH"
 
       - name: Create or update pull request
         id: pr
-        if: steps.check.outputs.skip == 'false' && steps.codeql_check.outputs.codeql_passed == 'true'
+        if: steps.check.outputs.skip == 'false'
         env:
           SLUG: ${{ steps.config.outputs.slug }}
-          VERSION: ${{ steps.release.outputs.version }}
+          VERSION: ${{ steps.prepare.outputs.version }}
           BRANCH: ${{ steps.fork.outputs.branch }}
           FORK_OWNER: ${{ steps.fork.outputs.fork_owner }}
           IS_NEW_PLUGIN: ${{ steps.current.outputs.is_new_plugin }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
           EXISTING_PR: ${{ steps.check.outputs.existing_pr }}
+          SOURCE_URL: ${{ steps.prepare.outputs.source_url }}
         run: |
           PR_TITLE=$(head -1 /tmp/release-notes/PR.md)
-          HIGHLIGHTS=$(cat /tmp/release-notes/HIGHLIGHTS.md)
-
           FULL_PR_TITLE="[${SLUG}] ${PR_TITLE}"
-
           if [ "$IS_NEW_PLUGIN" = "true" ]; then
             CHECKLIST="**If this is a new plugin:**
           - [x] Plugin folder is named \`lowercase-kebab-case\`
@@ -348,102 +355,58 @@ jobs:
           - [x] \`version\` in \`plugin.json\` is incremented
           - [x] I am listed in \`author\` or \`maintainers\` of the existing plugin"
           fi
-
           PR_BODY="## About this submission
 
-          ${HIGHLIGHTS}
-
           **Release**: [v${VERSION}](${RELEASE_URL})
+
+          This is an external-plugin submission. The registry downloads the source ZIP from \`${SOURCE_URL}\`.
 
           ## Pre-submission checklist
 
           ${CHECKLIST}"
-
           if [ -n "$EXISTING_PR" ]; then
-            gh pr edit "$EXISTING_PR" \
-              --repo "$PLUGINS_REPO" \
-              --title "$FULL_PR_TITLE" \
-              --body "$PR_BODY"
+            gh pr edit "$EXISTING_PR" --repo "$PLUGINS_REPO" --title "$FULL_PR_TITLE" --body "$PR_BODY"
             PR_URL=$(gh pr view "$EXISTING_PR" --repo "$PLUGINS_REPO" --json url --jq '.url')
             echo "pr_action=updated" >> "$GITHUB_OUTPUT"
           else
-            PR_URL=$(gh pr create \
-              --repo "$PLUGINS_REPO" \
-              --base main \
-              --head "${FORK_OWNER}:${BRANCH}" \
-              --title "$FULL_PR_TITLE" \
-              --body "$PR_BODY")
+            PR_URL=$(gh pr create --repo "$PLUGINS_REPO" --base main --head "${FORK_OWNER}:${BRANCH}" --title "$FULL_PR_TITLE" --body "$PR_BODY")
             echo "pr_action=created" >> "$GITHUB_OUTPUT"
           fi
-
-          echo "pr_url=$PR_URL"          >> "$GITHUB_OUTPUT"
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
           echo "pr_title=$FULL_PR_TITLE" >> "$GITHUB_OUTPUT"
 
       - name: Write job summary
         if: always()
         env:
           SLUG: ${{ steps.config.outputs.slug }}
-          VERSION: ${{ steps.release.outputs.version }}
+          VERSION: ${{ steps.prepare.outputs.version }}
           CURRENT_VERSION: ${{ steps.current.outputs.current_version }}
-          IS_NEW_PLUGIN: ${{ steps.current.outputs.is_new_plugin }}
-          BRANCH: ${{ steps.fork.outputs.branch }}
-          FORK_OWNER: ${{ steps.fork.outputs.fork_owner }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
+          SOURCE_URL: ${{ steps.prepare.outputs.source_url }}
           PR_URL: ${{ steps.pr.outputs.pr_url }}
           PR_TITLE: ${{ steps.pr.outputs.pr_title }}
           PR_ACTION: ${{ steps.pr.outputs.pr_action }}
           SKIP: ${{ steps.check.outputs.skip }}
-          CODEQL_PASSED: ${{ steps.codeql_check.outputs.codeql_passed }}
           SOURCE_REPO: ${{ steps.source.outputs.repo }}
           OPTED_OUT: ${{ steps.config.outputs.opted_out }}
         run: |
-          {
-            if [ -n "$PR_URL" ]; then
-              if [ "$PR_ACTION" = "updated" ]; then
-                echo "## Plugin PR Updated"
-              else
-                echo "## Plugin PR Created"
-              fi
-              echo ""
-              echo "| | |"
-              echo "|---|---|"
-              echo "| **PR** | [$PR_TITLE]($PR_URL) |"
-              echo "| **Plugin** | \`$SLUG\` |"
-              echo "| **Version** | \`$CURRENT_VERSION\` → \`$VERSION\` |"
-              if [ "$IS_NEW_PLUGIN" = "true" ]; then
-                echo "| **Type** | New plugin |"
-              else
-                echo "| **Type** | Update |"
-              fi
-              echo "| **Branch** | \`${FORK_OWNER}:${BRANCH}\` |"
-              echo "| **Source release** | [v${VERSION}]($RELEASE_URL) |"
-              if [ -f /tmp/release-notes/PR.md ]; then
-                echo ""
-                echo "### Commit message"
-                echo "\`\`\`"
-                cat /tmp/release-notes/PR.md
-                echo "\`\`\`"
-              fi
-            elif [ "$CODEQL_PASSED" = "false" ]; then
-              echo "## Blocked by CodeQL"
-              echo ""
-              echo "CodeQL (security-extended) found issues in \`$SLUG\` v${VERSION}. PR not created."
-              echo "Review the \`Check CodeQL results\` step logs for details."
-            elif [ "$SKIP" = "true" ]; then
-              echo "## Skipped"
-              echo ""
-              echo "No update needed for \`$SLUG\` — already at v${VERSION} in Plugins repo."
-            elif [ "$OPTED_OUT" = "true" ]; then
-              echo "## Skipped (opted out)"
-              echo ""
-              echo "Repo \`$SOURCE_REPO\` has \`never_submit_upstream: true\` in its manifest-config.json. Not submitting to the community Plugins repo."
-            elif [ -z "$SLUG" ]; then
-              echo "## Skipped"
-              echo ""
-              echo "Repo \`$SOURCE_REPO\` is not tracked in \`repos.json\`."
-            else
-              echo "## Failed"
-              echo ""
-              echo "Workflow did not complete successfully for \`$SLUG\` v${VERSION}. Check the step logs above."
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$PR_URL" ]; then
+            echo "## Plugin PR ${PR_ACTION^}" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "| | |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **PR** | [$PR_TITLE]($PR_URL) |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **Plugin** | \`$SLUG\` |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **Version** | \`$CURRENT_VERSION\` → \`$VERSION\` |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **Source release** | [$RELEASE_URL]($RELEASE_URL) |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **External ZIP** | \`$SOURCE_URL\` |" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$SKIP" = "true" ]; then
+            echo "## Skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "No update needed for \`$SLUG\`; it is already at v$VERSION in Plugins repo." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$OPTED_OUT" = "true" ]; then
+            echo "## Skipped (opted out)" >> "$GITHUB_STEP_SUMMARY"
+            echo "Repo \`$SOURCE_REPO\` has \`never_submit_upstream: true\`." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Failed" >> "$GITHUB_STEP_SUMMARY"
+            echo "Check the workflow logs for the failure details." >> "$GITHUB_STEP_SUMMARY"
+          fi
