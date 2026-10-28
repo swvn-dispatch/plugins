@@ -195,9 +195,14 @@ jobs:
               exit 1
             fi
             VERSION=$(jq -r '.version' "$BUNDLED_PLUGIN_JSON")
-            EXPECTED_VERSION="${CURRENT_VERSION}-dev-${COMMIT_SHORT}"
-            if [ "$VERSION" != "$EXPECTED_VERSION" ]; then
-              echo "::error::Dev ZIP has version '$VERSION'; expected '$EXPECTED_VERSION'. Publish an aligned dev prerelease first."
+            VERSION_PREFIX="${CURRENT_VERSION}-dev-"
+            if [[ "$VERSION" != "$VERSION_PREFIX"* ]]; then
+              echo "::error::Dev ZIP has version '$VERSION'; expected a prerelease based on '$CURRENT_VERSION'."
+              exit 1
+            fi
+            SUBMISSION_COMMIT_SHORT=${VERSION#"$VERSION_PREFIX"}
+            if ! [[ "$SUBMISSION_COMMIT_SHORT" =~ ^[0-9a-f]{8}$ ]]; then
+              echo "::error::Dev ZIP has version '$VERSION'; its dev suffix must be an 8-character lowercase commit SHA."
               exit 1
             fi
             SOURCE_URL="${ASSET_URL}?version={version}"
@@ -208,6 +213,7 @@ jobs:
             fi
             SOURCE_URL=${ASSET_URL/"/download/$TAG/"/"/download/v{version}/"}
             SOURCE_URL=${SOURCE_URL//"$VERSION"/"{version}"}
+            SUBMISSION_COMMIT_SHORT=$COMMIT_SHORT
           fi
 
           RESOLVED_URL=${SOURCE_URL//\{version\}/$VERSION}
@@ -230,6 +236,7 @@ jobs:
           gh api "repos/$REPO/contents/$LOGO_PATH" --jq '.content' | base64 -d > /tmp/registry-plugin/logo.png
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "commit_short=$SUBMISSION_COMMIT_SHORT" >> "$GITHUB_OUTPUT"
           echo "source_url=$SOURCE_URL" >> "$GITHUB_OUTPUT"
 
       - name: Check if update is needed
@@ -264,7 +271,7 @@ jobs:
           MODE: ${{ steps.release.outputs.mode }}
           VERSION: ${{ steps.prepare.outputs.version }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
-          COMMIT_SHORT: ${{ steps.release.outputs.commit_short }}
+          COMMIT_SHORT: ${{ steps.prepare.outputs.commit_short }}
         run: |
           mkdir -p /tmp/release-notes
           if [ "$MODE" = "dev" ]; then
