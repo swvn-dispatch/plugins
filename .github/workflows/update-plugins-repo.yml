@@ -95,7 +95,6 @@ jobs:
           echo "opted_out=false" >> "$GITHUB_OUTPUT"
           echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
           echo "logo_path=$(echo "$ENTRY" | jq -r '.logo // empty')" >> "$GITHUB_OUTPUT"
-          echo "dev_tag=$(echo "$ENTRY" | jq -r '.dev_tag // empty')" >> "$GITHUB_OUTPUT"
 
       - name: Get current registry version
         id: current
@@ -117,21 +116,24 @@ jobs:
         if: steps.config.outputs.slug != ''
         env:
           REPO: ${{ steps.source.outputs.repo }}
-          DEV_TAG: ${{ steps.config.outputs.dev_tag }}
           CURRENT_VERSION: ${{ steps.current.outputs.current_version }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ -z "$DEV_TAG" ]; then
-              echo "::error::No dev_tag is configured for '$REPO'."
-              exit 1
-            fi
-            RELEASE=$(gh api "repos/$REPO/releases/tags/$DEV_TAG" 2>/dev/null || true)
-            if [ -z "$RELEASE" ] || ! echo "$RELEASE" | jq -e '.prerelease == true and .draft == false' >/dev/null; then
-              echo "::error::No published prerelease tagged '$DEV_TAG' was found for '$REPO'."
+            RELEASE=$(gh api "repos/$REPO/releases?per_page=100" --jq '
+              [ .[]
+                | select(.prerelease == true and .draft == false)
+                | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+-dev-[0-9a-f]{8}$"))
+              ]
+              | sort_by(.published_at)
+              | reverse
+              | .[0] // empty
+            ' 2>/dev/null || true)
+            if [ -z "$RELEASE" ]; then
+              echo "::error::No published versioned dev prerelease was found for '$REPO'."
               exit 1
             fi
             MODE=dev
-            TAG=$DEV_TAG
+            TAG=$(echo "$RELEASE" | jq -r '.tag_name')
             VERSION=""
           else
             RELEASE=$(gh api "repos/$REPO/releases/latest" 2>/dev/null || true)
@@ -208,16 +210,20 @@ jobs:
               echo "::error::Dev ZIP has version '$VERSION'; its dev suffix must be an 8-character lowercase commit SHA."
               exit 1
             fi
-            SOURCE_URL="${ASSET_URL}?version={version}"
-          else
-            if [[ "$ASSET_URL" != *"/download/$TAG/"* ]] || [[ "$ASSET_NAME" != *"$VERSION"* ]]; then
-              echo "::error::Cannot create a versioned external source URL from '$ASSET_URL'."
+            if [ "$TAG" != "v$VERSION" ] || [ "$SUBMISSION_COMMIT_SHORT" != "$COMMIT_SHORT" ]; then
+              echo "::error::Dev release tag '$TAG' does not match ZIP version '$VERSION' and commit '$COMMIT_SHORT'."
               exit 1
             fi
-            SOURCE_URL=${ASSET_URL/"/download/$TAG/"/"/download/v{version}/"}
-            SOURCE_URL=${SOURCE_URL//"$VERSION"/"{version}"}
+          else
             SUBMISSION_COMMIT_SHORT=$COMMIT_SHORT
           fi
+
+          if [[ "$ASSET_URL" != *"/download/$TAG/"* ]] || [[ "$ASSET_NAME" != *"$VERSION"* ]]; then
+            echo "::error::Cannot create a versioned external source URL from '$ASSET_URL'."
+            exit 1
+          fi
+          SOURCE_URL=${ASSET_URL/"/download/$TAG/"/"/download/v{version}/"}
+          SOURCE_URL=${SOURCE_URL//"$VERSION"/"{version}"}
 
           RESOLVED_URL=${SOURCE_URL//\{version\}/$VERSION}
           if ! curl --fail --location --silent --show-error --output /dev/null "$RESOLVED_URL"; then

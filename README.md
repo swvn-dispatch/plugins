@@ -93,7 +93,7 @@ For each entry in `repos.json` the script:
    - Downloads it and computes a SHA-256 checksum
    - Reads `min_dispatcharr_version` from the bundled `plugin.json`
    - Resolves the commit SHA from the release tag
-5. Processes the **dev pre-release** (looked up by the fixed `dev_tag`, e.g. `dev-latest`):
+5. Processes the two newest **versioned dev pre-releases** (`vX.Y.Z-dev-<shortsha>`):
    - Same as above but marked `prerelease: true` in the per-plugin manifest
    - Never appears as `latest_version` in the root manifest
 6. Fetches the plugin logo from `main`.
@@ -108,7 +108,7 @@ If a plugin has no stable releases yet, all `latest_*` fields are omitted from t
 
 `Update Plugins Repo` submits tracked releases to the Dispatcharr community registry as [external plugins](https://github.com/Dispatcharr/Plugins/blob/main/CONTRIBUTING.md#external-plugin). Its generated registry directory contains only `plugin.json` and `logo.png`; source files and READMEs are removed during the first migrated submission.
 
-A `plugin-updated` repository dispatch submits the latest stable release. To submit a dev prerelease deliberately, run the workflow from the Actions tab and enter the tracked plugin slug or source repository short name. The workflow reads the configured `dev_tag`, normally `dev-latest`, and verifies the ZIP's embedded version is `<registry-stable-version>-dev-<shortsha>` before opening a PR. The upstream dev artifact remains mutable, so run the workflow again after the dev tag advances.
+A `plugin-updated` repository dispatch submits the latest stable release. To submit a dev prerelease deliberately, run the workflow from the Actions tab and enter the tracked plugin slug or source repository short name. The workflow selects the newest versioned dev prerelease and verifies that its tag, ZIP, and embedded version agree on `<registry-stable-version>-dev-<shortsha>` before opening a PR. Dev artifacts are immutable, and each plugin repository retains its five newest dev releases.
 
 ### Configuration files
 
@@ -119,8 +119,7 @@ A `plugin-updated` repository dispatch submits the latest stable release. To sub
   {
     "repo": "sethwv/dispatcharr-exporter",
     "plugin_json": "src/plugin.json",
-    "logo": "src/logo.png",
-    "dev_tag": "dev-latest"
+    "logo": "src/logo.png"
   }
 ]
 ```
@@ -130,7 +129,6 @@ A `plugin-updated` repository dispatch submits the latest stable release. To sub
 | `repo` | GitHub `owner/repo` slug |
 | `plugin_json` | Path to `plugin.json` inside the repo |
 | `logo` | Path to the logo image inside the repo |
-| `dev_tag` | Fixed Git tag name used for the dev pre-release |
 
 **`config.json`** — registry-level settings:
 

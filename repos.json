@@ -2,40 +2,34 @@
   {
     "repo": "swvn-dispatch/dispatcharr-exporter",
     "plugin_json": "src/plugin.json",
-    "logo": "src/logo.png",
-    "dev_tag": "dev-latest"
+    "logo": "src/logo.png"
   },
   {
     "repo": "swvn-dispatch/embyfin-stream-cleanup",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
-    "dev_tag": "dev-latest",
     "private": true
   },
   {
     "repo": "swvn-dispatch/disp-ldap",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png",
-    "dev_tag": "dev-latest",
     "private": true
   },
   {
     "repo": "swvn-dispatch/dispatcharr-multiview",
     "plugin_json": "src/plugin.json",
-    "logo": "src/logo.png",
-    "dev_tag": "dev-latest"
+    "logo": "src/logo.png"
   },
   {
     "repo": "swvn-dispatch/twitcharr-fork",
     "plugin_json": "twitcharr/plugin.json",
     "logo": "twitcharr/logo.png",
-    "dev_tag": "dev-latest",
     "private": true
   },
   {
     "repo": "swvn-dispatch/source-switch",
     "plugin_json": "src/plugin.json",
-    "logo": "src/logo.png",
-    "dev_tag": "dev-latest"
+    "logo": "src/logo.png"
   }
 ]

@@ -24,6 +24,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
@@ -127,21 +128,22 @@ def plugin_json_from_zip(data):
 def process_plugin(repo_entry):
     """
     Scan a plugin repo's releases and return
-    (slug, meta, versions, dev_entry, logo_bytes, mirror_files).
+    (slug, meta, versions, dev_entries, logo_bytes, mirror_files).
     Returns None on fatal failure.
+
+    `dev_entries` contains up to the two newest versioned dev prereleases.
 
     `mirror_files` is a `{filename: bytes}` map of release zips that need to
     be re-hosted on this (public) aggregator repo's own manifest branch,
     because `repo_entry["private"]` is set — a private plugin repo's
     `browser_download_url` 404s for Dispatcharr's own unauthenticated
     install/update fetch, even though this script can download it itself via
-    an authenticated API call. `versions`/`dev_entry` `url` fields already
+    an authenticated API call. `versions`/`dev_entries` `url` fields already
     point at the mirrored location in that case.
     """
     repo = repo_entry["repo"]
     plugin_json_path = repo_entry.get("plugin_json", "src/plugin.json")
     logo_path = repo_entry.get("logo", "src/logo.png")
-    dev_tag = repo_entry.get("dev_tag")
     is_private = bool(repo_entry.get("private"))
     mirror_files: dict[str, bytes] = {}
 
@@ -232,51 +234,62 @@ def process_plugin(repo_entry):
         versions.append(entry)
         print(f"    -> ok  sha256={sha256[:16]}...", flush=True)
 
-    # Dev pre-release
-    dev_entry = None
-    if dev_tag:
-        print(f"\n  Looking for dev pre-release '{dev_tag}'...", flush=True)
-        try:
-            dev_rel = json.loads(gh("api", f"repos/{repo}/releases/tags/{dev_tag}"))
-        except subprocess.CalledProcessError:
-            dev_rel = None
+    # Keep the two newest immutable dev prereleases in the per-plugin manifest.
+    dev_entries = []
+    dev_version_pattern = re.compile(r"^v?(\d+\.\d+\.\d+-dev-[0-9a-f]{8})$")
+    print("\n  Looking for versioned dev prereleases...", flush=True)
+    for dev_rel in sorted(releases, key=lambda r: r["published_at"], reverse=True):
+        if dev_rel["draft"] or not dev_rel["prerelease"]:
+            continue
 
-        if dev_rel and dev_rel.get("prerelease"):
-            dev_asset = next(
-                (a for a in dev_rel["assets"] if a["name"].endswith(".zip")),
-                None,
-            )
-            if dev_asset:
-                dev_url = dev_asset["browser_download_url"]
-                print(f"  Found: {dev_url}", flush=True)
-                dev_data = fetch_asset_bytes(dev_asset)
-                if dev_data:
-                    if is_private:
-                        mirror_files[dev_asset["name"]] = dev_data
-                        dev_url = f"{mirror_root}/{dev_asset['name']}"
+        tag = dev_rel["tag_name"]
+        tag_match = dev_version_pattern.fullmatch(tag)
+        if not tag_match:
+            continue
 
-                    dev_sha256 = hashlib.sha256(dev_data).hexdigest()
-                    dev_pj = plugin_json_from_zip(dev_data)
-                    dev_ver_str = dev_pj.get("version") or dev_rel["tag_name"]
-                    dev_min_ver = dev_pj.get("min_dispatcharr_version")
-                    dev_commit_sha, dev_commit_short = resolve_commit(repo, dev_rel["tag_name"])
-                    dev_entry = {
-                        "version": dev_ver_str,
-                        "url": dev_url,
-                        "checksum_sha256": dev_sha256,
-                        "build_timestamp": dev_rel["published_at"],
-                        "prerelease": True,
-                    }
-                    if dev_commit_sha:
-                        dev_entry["commit_sha"] = dev_commit_sha
-                        dev_entry["commit_sha_short"] = dev_commit_short
-                    if dev_min_ver:
-                        dev_entry["min_dispatcharr_version"] = dev_min_ver
-                    print(f"    -> ok  sha256={dev_sha256[:16]}...", flush=True)
-        else:
-            print(f"  No dev pre-release found.", flush=True)
+        dev_asset = next((a for a in dev_rel["assets"] if a["name"].endswith(".zip")), None)
+        if not dev_asset:
+            print(f"  {tag}: no zip asset - skipping", flush=True)
+            continue
 
-    return slug, meta, versions, dev_entry, logo_bytes, mirror_files
+        dev_data = fetch_asset_bytes(dev_asset)
+        if dev_data is None:
+            continue
+
+        dev_pj = plugin_json_from_zip(dev_data)
+        dev_version = dev_pj.get("version")
+        if dev_version != tag_match.group(1):
+            print(f"  {tag}: bundled version {dev_version!r} does not match tag - skipping", flush=True)
+            continue
+
+        dev_url = dev_asset["browser_download_url"]
+        if is_private:
+            mirror_files[dev_asset["name"]] = dev_data
+            dev_url = f"{mirror_root}/{dev_asset['name']}"
+
+        dev_entry = {
+            "version": dev_version,
+            "url": dev_url,
+            "checksum_sha256": hashlib.sha256(dev_data).hexdigest(),
+            "build_timestamp": dev_rel["published_at"],
+            "prerelease": True,
+        }
+        dev_commit_sha, dev_commit_short = resolve_commit(repo, tag)
+        if dev_commit_sha:
+            dev_entry["commit_sha"] = dev_commit_sha
+            dev_entry["commit_sha_short"] = dev_commit_short
+        dev_min_ver = dev_pj.get("min_dispatcharr_version")
+        if dev_min_ver:
+            dev_entry["min_dispatcharr_version"] = dev_min_ver
+        dev_entries.append(dev_entry)
+        print(f"  {dev_version}: ok  sha256={dev_entry['checksum_sha256'][:16]}...", flush=True)
+        if len(dev_entries) == 2:
+            break
+
+    if not dev_entries:
+        print("  No versioned dev prereleases found.", flush=True)
+
+    return slug, meta, versions, dev_entries, logo_bytes, mirror_files
 
 
 def main():
@@ -302,9 +315,9 @@ def main():
         if result is None:
             continue
 
-        slug, meta, versions, dev_entry, logo_bytes, mirror_files = result
+        slug, meta, versions, dev_entries, logo_bytes, mirror_files = result
 
-        if not versions and not dev_entry:
+        if not versions and not dev_entries:
             print(f"  No releases found for {repo_entry['repo']} – skipping.", flush=True)
             continue
 
@@ -344,7 +357,7 @@ def main():
             "author": meta.get("author", ""),
             "license": meta.get("license", "MIT"),
             "latest_version": latest_ver,
-            "versions": versions + ([dev_entry] if dev_entry else []),
+            "versions": versions + dev_entries,
             "latest": {**latest} if latest else None,
         }
         per_plugin = {k: v for k, v in per_plugin.items() if v is not None}
@@ -369,7 +382,7 @@ def main():
             print(f"  Mirrored {filename} ({len(blob)} bytes)", flush=True)
 
         stable_count = len(versions)
-        print(f"  Done: {stable_count} stable{', 1 dev' if dev_entry else ''}", flush=True)
+        print(f"  Done: {stable_count} stable, {len(dev_entries)} dev", flush=True)
 
     if not any_output:
         print("\nNo plugins produced output – nothing to publish.")
