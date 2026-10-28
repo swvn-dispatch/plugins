@@ -36,6 +36,16 @@
       "help_url": "https://github.com/swvn-dispatch/embyfin-stream-cleanup"
     },
     {
+      "slug": "ldap_auth",
+      "name": "LDAP Auth",
+      "description": "LDAP/Active Directory authentication for UI login and XC endpoints",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/ldap_auth/manifest.json",
+      "icon_url": "plugins/ldap_auth/logo.png",
+      "help_url": "https://github.com/swvn-dispatch/dispatcharr-ldap"
+    },
+    {
       "slug": "multiview",
       "name": "Multiview",
       "description": "Tile multiple Dispatcharr channel streams into multi-view outputs using FFmpeg",
@@ -60,6 +70,16 @@
       "manifest_url": "plugins/twitcharr/manifest.json",
       "icon_url": "plugins/twitcharr/logo.png",
       "help_url": "https://github.com/eliasbruno124-dev/Twitcharr"
+    },
+    {
+      "slug": "force_fallback",
+      "name": "Force Fallback",
+      "description": "Mobile-friendly dashboard to view live Dispatcharr stream sessions, connected clients, and swap sources on the fly",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/force_fallback/manifest.json",
+      "icon_url": "plugins/force_fallback/logo.png",
+      "help_url": "https://github.com/swvn-dispatch/force-fallback"
     }
   ]
 }

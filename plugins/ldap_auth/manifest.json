@@ -6,13 +6,13 @@
   "license": "MIT",
   "versions": [
     {
-      "version": "0.0.0-dev-f8b8bfde",
-      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/ldap_auth/ldap-auth-dev-latest.zip",
-      "checksum_sha256": "fbb5b9146f57ee1a362e5763c976d740c22ceab3b8abac416294e0a3d58dd8f7",
-      "build_timestamp": "2026-04-13T17:13:30Z",
+      "version": "0.0.0-dev-848f4523",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/ldap_auth/ldap-auth-0.0.0-dev-848f4523.zip",
+      "checksum_sha256": "436b8a94c03bdbe30a3a0221f08a39bb81fd6d5aa936c611e538fa591bb07ceb",
+      "build_timestamp": "2026-10-28T19:10:56Z",
       "prerelease": true,
-      "commit_sha": "3866fdfa6739f7f1763e2acd3c746695abc6a4f9",
-      "commit_sha_short": "3866fdfa",
+      "commit_sha": "848f4523cd3678cc29a4a4a4bf38ec119135beab",
+      "commit_sha_short": "848f4523",
       "min_dispatcharr_version": "v0.22.0"
     }
   ]
