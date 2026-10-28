@@ -124,16 +124,6 @@
       "build_timestamp": "2025-12-18T17:01:24Z",
       "commit_sha": "6b2c98fa3981d957f5b3c2b3d5f95953206fd19b",
       "commit_sha_short": "6b2c98fa"
-    },
-    {
-      "version": "3.1.0-dev-1a726b75",
-      "url": "https://github.com/swvn-dispatch/dispatcharr-exporter/releases/download/dev-latest/dispatcharr-exporter-dev-latest.zip",
-      "checksum_sha256": "4ad138132f905ff6a66c822690d317817e93e5eaa16e03d748e73b962e6ca5d0",
-      "build_timestamp": "2026-10-26T17:28:39Z",
-      "prerelease": true,
-      "commit_sha": "c9fcd50ed56ca15cd4222813329aaef961ee4483",
-      "commit_sha_short": "c9fcd50e",
-      "min_dispatcharr_version": "v0.22.0"
     }
   ],
   "latest": {
