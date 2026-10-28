@@ -1,3 +1,3 @@
-Fix multiview video cadence, EPG cleanup, and audio timing
+Add GPU composition, regex channel ordering, and playback fixes
 
-Times each multiview tile to its source video so mixed frame rates play smoothly, retains MPEG-2 B-frames to preserve source cadence, clears EPG data for retired layouts during refreshes, and corrects audio buffer timestamps used for A/V synchronization.
+Adds automatic GPU tile composition for supported hardware encoders, configurable ordering for regex-selected channels, and immediate M3U updates after layout reordering. It also improves audio synchronization, mixed-frame-rate playback, and PyAV installation on Python 3.13.

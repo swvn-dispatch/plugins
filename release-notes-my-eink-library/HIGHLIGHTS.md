@@ -1,2 +1,0 @@
-- Improved sign-in, session, email, and cover download security.
-- Cover thumbnails no longer use the vulnerable image processing library.

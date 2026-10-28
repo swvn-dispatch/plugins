@@ -51,5 +51,6 @@
 		}
 	],
 	"settings": {
+		"codeQL.githubDatabase.download": "never"
 	}
 }
