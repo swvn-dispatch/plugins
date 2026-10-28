@@ -280,8 +280,6 @@ jobs:
           if [ "$MODE" = "dev" ]; then
             {
               printf 'Update to v%s\n' "$VERSION"
-              printf '\nThis deliberate dev prerelease tracks source commit `%s`.\n' "$COMMIT_SHORT"
-              printf '\n**Source release:** %s\n' "$RELEASE_URL"
               if [ -s /tmp/source-release/body.md ]; then
                 printf '\n%s\n' "$(cat /tmp/source-release/body.md)"
               fi
@@ -347,8 +345,7 @@ jobs:
           git config user.name "sethwv"
           git config user.email "sethwv@users.noreply.github.com"
           PR_TITLE=$(head -1 /tmp/submission/PR.md)
-          PR_BODY=$(tail -n +3 /tmp/submission/PR.md)
-          git commit -m "[${SLUG}] ${PR_TITLE}" -m "$PR_BODY"
+          git commit -m "[${SLUG}] ${PR_TITLE}"
           git remote set-url origin "https://x-access-token:${{ secrets.SETH_PAT }}@github.com/${FORK_OWNER}/${{ steps.fork.outputs.repo_dir }}.git"
           git push -f origin "$BRANCH"
 
@@ -361,13 +358,22 @@ jobs:
           BRANCH: ${{ steps.fork.outputs.branch }}
           FORK_OWNER: ${{ steps.fork.outputs.fork_owner }}
           IS_NEW_PLUGIN: ${{ steps.current.outputs.is_new_plugin }}
+          MODE: ${{ steps.release.outputs.mode }}
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
+          REPO: ${{ steps.source.outputs.repo }}
+          COMMIT_SHA: ${{ steps.release.outputs.commit_sha }}
+          COMMIT_SHORT: ${{ steps.prepare.outputs.commit_short }}
           EXISTING_PR: ${{ steps.check.outputs.existing_pr }}
           SOURCE_URL: ${{ steps.prepare.outputs.source_url }}
         run: |
           PR_TITLE=$(head -1 /tmp/submission/PR.md)
           FULL_PR_TITLE="[${SLUG}] ${PR_TITLE}"
           RELEASE_NOTES=$(tail -n +2 /tmp/submission/PR.md)
+          if [ "$MODE" = "dev" ]; then
+            SOURCE_REFERENCE="**Source commit:** [\`${COMMIT_SHORT}\`](https://github.com/${REPO}/commit/${COMMIT_SHA})"
+          else
+            SOURCE_REFERENCE="**Release**: [v${VERSION}](${RELEASE_URL})"
+          fi
           if [ "$IS_NEW_PLUGIN" = "true" ]; then
             CHECKLIST="**If this is a new plugin:**
           - [x] Plugin folder is named \`lowercase-kebab-case\`
@@ -384,7 +390,7 @@ jobs:
 
           ${RELEASE_NOTES}
 
-          **Release**: [v${VERSION}](${RELEASE_URL})
+          ${SOURCE_REFERENCE}
 
           ## Pre-submission checklist
 
