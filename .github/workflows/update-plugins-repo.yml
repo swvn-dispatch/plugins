@@ -155,6 +155,9 @@ jobs:
           RELEASE_URL=$(echo "$RELEASE" | jq -r '.html_url')
           COMMIT_SHA=$(gh api "repos/$REPO/commits/$TAG" --jq '.sha')
 
+          mkdir -p /tmp/source-release
+          printf '%s\n' "$(echo "$RELEASE" | jq -r '.body // ""')" > /tmp/source-release/body.md
+
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -273,12 +276,26 @@ jobs:
           RELEASE_URL: ${{ steps.release.outputs.release_url }}
           COMMIT_SHORT: ${{ steps.prepare.outputs.commit_short }}
         run: |
-          mkdir -p /tmp/release-notes
+          mkdir -p /tmp/submission
           if [ "$MODE" = "dev" ]; then
-            printf 'Update to v%s\n\nManual dev prerelease from commit `%s`.\nSee source release: %s\n' "$VERSION" "$COMMIT_SHORT" "$RELEASE_URL" > /tmp/release-notes/PR.md
+            {
+              printf 'Update to v%s\n' "$VERSION"
+              printf '\nThis deliberate dev prerelease tracks source commit `%s`.\n' "$COMMIT_SHORT"
+              printf '\n**Source release:** %s\n' "$RELEASE_URL"
+              if [ -s /tmp/source-release/body.md ]; then
+                printf '\n%s\n' "$(cat /tmp/source-release/body.md)"
+              fi
+            } > /tmp/submission/PR.md
           else
-            printf 'See the full changelog at %s\n' "$RELEASE_URL" > /tmp/release-notes/HIGHLIGHTS.md
-            printf 'Update to v%s\n\nSee release notes: %s\n' "$VERSION" "$RELEASE_URL" > /tmp/release-notes/PR.md
+            if ! grep -q '[^[:space:]]' /tmp/source-release/body.md; then
+              echo "::error::Stable release '$VERSION' has no release body. Add a meaningful changelog before submitting it to the registry."
+              exit 1
+            fi
+            {
+              printf 'Update to v%s\n\n' "$VERSION"
+              cat /tmp/source-release/body.md
+              printf '\n\n**Source release:** %s\n' "$RELEASE_URL"
+            } > /tmp/submission/PR.md
           fi
 
       - name: Fork and clone Plugins repo
@@ -329,8 +346,8 @@ jobs:
           cd "${{ steps.fork.outputs.repo_dir }}"
           git config user.name "sethwv"
           git config user.email "sethwv@users.noreply.github.com"
-          PR_TITLE=$(head -1 /tmp/release-notes/PR.md)
-          PR_BODY=$(tail -n +3 /tmp/release-notes/PR.md)
+          PR_TITLE=$(head -1 /tmp/submission/PR.md)
+          PR_BODY=$(tail -n +3 /tmp/submission/PR.md)
           git commit -m "[${SLUG}] ${PR_TITLE}" -m "$PR_BODY"
           git remote set-url origin "https://x-access-token:${{ secrets.SETH_PAT }}@github.com/${FORK_OWNER}/${{ steps.fork.outputs.repo_dir }}.git"
           git push -f origin "$BRANCH"
@@ -348,8 +365,9 @@ jobs:
           EXISTING_PR: ${{ steps.check.outputs.existing_pr }}
           SOURCE_URL: ${{ steps.prepare.outputs.source_url }}
         run: |
-          PR_TITLE=$(head -1 /tmp/release-notes/PR.md)
+          PR_TITLE=$(head -1 /tmp/submission/PR.md)
           FULL_PR_TITLE="[${SLUG}] ${PR_TITLE}"
+          RELEASE_NOTES=$(tail -n +2 /tmp/submission/PR.md)
           if [ "$IS_NEW_PLUGIN" = "true" ]; then
             CHECKLIST="**If this is a new plugin:**
           - [x] Plugin folder is named \`lowercase-kebab-case\`
@@ -364,9 +382,9 @@ jobs:
           fi
           PR_BODY="## About this submission
 
-          **Release**: [v${VERSION}](${RELEASE_URL})
+          ${RELEASE_NOTES}
 
-          This is an external-plugin submission. The registry downloads the source ZIP from \`${SOURCE_URL}\`.
+          **Release**: [v${VERSION}](${RELEASE_URL})
 
           ## Pre-submission checklist
 
