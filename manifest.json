@@ -1,7 +1,7 @@
 {
   "registry_name": "swvn-dispatch/dev-plugins",
   "registry_url": "https://github.com/swvn-dispatch/plugins",
-  "root_url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest",
+  "root_url": "https://swvn-dispatch.github.io/plugins/",
   "plugins": [
     {
       "slug": "dispatcharr_exporter",
