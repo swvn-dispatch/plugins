@@ -303,7 +303,8 @@ def main():
 
     registry_name = config.get("registry_name", "Dev Plugins")
     registry_url = f"https://github.com/{this_repo}"
-    root_url = f"https://raw.githubusercontent.com/{this_repo}/manifest"
+    root_url = f"https://swvn-dispatch.github.io/plugins/"
+    # root_url = f"https://raw.githubusercontent.com/{this_repo}/manifest"
 
     os.makedirs(OUT_DIR, exist_ok=True)
 
