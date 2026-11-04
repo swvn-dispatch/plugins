@@ -115,6 +115,16 @@
       "min_dispatcharr_version": "v0.22.0"
     },
     {
+      "version": "0.5.0-dev-a36723aa",
+      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.5.0-dev-a36723aa/multiview-0.5.0-dev-a36723aa.zip",
+      "checksum_sha256": "c9ac03a72a2b2d415f0f89e4400c466c56fd499fef03ac1c8fea643178da2011",
+      "build_timestamp": "2026-11-04T14:51:33Z",
+      "prerelease": true,
+      "commit_sha": "a36723aa1b6193f76691f4ecd65e2b2e8ccb4bf3",
+      "commit_sha_short": "a36723aa",
+      "min_dispatcharr_version": "v0.27.0"
+    },
+    {
       "version": "0.5.0-dev-8f9cb4cd",
       "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.5.0-dev-8f9cb4cd/multiview-0.5.0-dev-8f9cb4cd.zip",
       "checksum_sha256": "1eaeccbed3d4655f72985362e47b4344a433c10a220d18f4ce1dc2189e08a2f5",
@@ -122,16 +132,6 @@
       "prerelease": true,
       "commit_sha": "8f9cb4cd0d57b6c0c8f31e9c637075148018b779",
       "commit_sha_short": "8f9cb4cd",
-      "min_dispatcharr_version": "v0.27.0"
-    },
-    {
-      "version": "0.5.0-dev-cc2d9f1d",
-      "url": "https://github.com/swvn-dispatch/dispatcharr-multiview/releases/download/v0.5.0-dev-cc2d9f1d/multiview-0.5.0-dev-cc2d9f1d.zip",
-      "checksum_sha256": "4bc0bcfb47f0a8e0d273c86293fe92fb16cc43e752c78b780d0565de36341442",
-      "build_timestamp": "2026-11-04T14:09:50Z",
-      "prerelease": true,
-      "commit_sha": "cc2d9f1d98769609b753089766f39abec1f56e1d",
-      "commit_sha_short": "cc2d9f1d",
       "min_dispatcharr_version": "v0.27.0"
     }
   ],
