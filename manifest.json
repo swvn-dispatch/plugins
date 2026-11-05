@@ -72,14 +72,14 @@
       "help_url": "https://github.com/eliasbruno124-dev/Twitcharr"
     },
     {
-      "slug": "force_fallback",
-      "name": "Force Fallback",
-      "description": "Mobile-friendly dashboard to view live Dispatcharr stream sessions, connected clients, and swap sources on the fly",
+      "slug": "source_switch",
+      "name": "Source Switch",
+      "description": "Mobile-friendly dashboard for live, VOD, and catch-up connections, with live source switching",
       "author": "sethwv",
       "license": "MIT",
-      "manifest_url": "plugins/force_fallback/manifest.json",
-      "icon_url": "plugins/force_fallback/logo.png",
-      "help_url": "https://github.com/swvn-dispatch/force-fallback"
+      "manifest_url": "plugins/source_switch/manifest.json",
+      "icon_url": "plugins/source_switch/logo.png",
+      "help_url": "https://github.com/swvn-dispatch/source-switch"
     }
   ]
 }

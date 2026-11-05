@@ -1,0 +1,19 @@
+{
+  "slug": "source_switch",
+  "name": "Source Switch",
+  "description": "Mobile-friendly dashboard for live, VOD, and catch-up connections, with live source switching",
+  "author": "sethwv",
+  "license": "MIT",
+  "versions": [
+    {
+      "version": "0.0.0-dev-04e987b5",
+      "url": "https://github.com/swvn-dispatch/source-switch/releases/download/v0.0.0-dev-04e987b5/source-switch-0.0.0-dev-04e987b5.zip",
+      "checksum_sha256": "dbec0cc58f824b63e2c4fff5944f0ea81c784eda50d454af6fc4d27b87bde683",
+      "build_timestamp": "2026-10-28T19:11:15Z",
+      "prerelease": true,
+      "commit_sha": "04e987b56fe44fb80a95b23bf43eee8cd1ced42b",
+      "commit_sha_short": "04e987b5",
+      "min_dispatcharr_version": "v0.34.0"
+    }
+  ]
+}
