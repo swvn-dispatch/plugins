@@ -1,6 +1,6 @@
-**Multiview v0.5.0**
+**v0.6.0 highlights**
 
-- Use GPU tile composition automatically with supported NVIDIA, Intel, and VAAPI hardware encoders.
-- Control the order of regex-selected channels by channel number or by regex alternative.
-- Keep M3U channel numbers in sync when layouts are reordered in the dashboard.
-- Improved audio synchronization and mixed-frame-rate playback.
+- Watch multiviews in 4K with the new output preset.
+- Automatically reload active multiviews when their channels or stream settings change, or reload them all from plugin settings.
+- Choose whether compatible players show generated audio track labels.
+- Enjoy more reliable tile recovery and improved audio synchronization during playback.

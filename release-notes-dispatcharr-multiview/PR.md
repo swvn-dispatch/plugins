@@ -1,3 +1,3 @@
-Add GPU composition, regex channel ordering, and playback fixes
+Add 4K output, live reload controls, and stream recovery improvements
 
-Adds automatic GPU tile composition for supported hardware encoders, configurable ordering for regex-selected channels, and immediate M3U updates after layout reordering. It also improves audio synchronization, mixed-frame-rate playback, and PyAV installation on Python 3.13.
+This release adds a 4K output preset, configurable audio track labels, and manual or automatic reloading of active multiviews when their configuration changes. It also improves tile recovery during source stalls, format changes, and timing discontinuities, and keeps audio aligned with displayed video for more reliable playback.

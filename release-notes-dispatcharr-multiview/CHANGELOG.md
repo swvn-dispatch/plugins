@@ -2,16 +2,13 @@
 
 ### Added
 
-- Added automatic GPU tile composition for NVENC, QSV, and VAAPI encoders when the installed FFmpeg and GPU support it. Streams fall back to CPU composition when unavailable.
-- Added regex channel ordering by channel number, reverse channel number, or the order of top-level regex alternatives.
-
-### Changed
-
-- Layout reordering now immediately regenerates the M3U playlist so channel numbers follow the dashboard order.
-- Regex channel patterns now use a multi-line editor that wraps long expressions.
+- Added a 4K (3840x2160) output resolution preset.
+- Added optional automatic reloads for active multiviews when matching channels or stream settings change. Reloads briefly interrupt playback.
+- Added a plugin settings button to reload all active multiviews.
+- Added a setting to enable or disable generated audio track labels.
 
 ### Fixed
 
-- Improved audio and video synchronization, including recovery when audio timestamp gating would otherwise remain silent.
-- Improved video cadence for sources with frame rates that differ from the output frame rate.
-- Restored automatic PyAV installation on Python 3.13.
+- Improved tile recovery when sources stall, switch formats, reconnect, or experience timestamp jumps, while keeping unaffected tiles playing.
+- Improved live playback recovery when a tile falls behind the available stream buffer.
+- Improved audio synchronization with the video being displayed, including after source recovery.
