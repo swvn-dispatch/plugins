@@ -6,6 +6,15 @@
   "license": "MIT",
   "versions": [
     {
+      "version": "0.0.0-dev-5a234caf",
+      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/twitcharr/twitcharr-0.0.0-dev-5a234caf.zip",
+      "checksum_sha256": "734cafbad074adacfc598d6c3322bf8753b3e8c3d54fd4ffcf3f2437fe80c7a3",
+      "build_timestamp": "2026-11-06T16:00:02Z",
+      "prerelease": true,
+      "commit_sha": "5a234cafc00987885bb8d765ee9ed4182fc8d5dd",
+      "commit_sha_short": "5a234caf"
+    },
+    {
       "version": "0.0.0-dev-feeff25b",
       "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/twitcharr/twitcharr-0.0.0-dev-feeff25b.zip",
       "checksum_sha256": "d3e2367fb37afa183ceb4f0f9afe0b78a0eba0ad3647d5a0c1f6dee818c9bee9",
@@ -13,15 +22,6 @@
       "prerelease": true,
       "commit_sha": "feeff25b235a54f2525a434773387e1127055ada",
       "commit_sha_short": "feeff25b"
-    },
-    {
-      "version": "0.0.0-dev-4d844d8b",
-      "url": "https://raw.githubusercontent.com/swvn-dispatch/plugins/manifest/plugins/twitcharr/twitcharr-0.0.0-dev-4d844d8b.zip",
-      "checksum_sha256": "ce2cb44002d225a5ec58bdac837e0f3f7db9724b78a0878a0d9c523b168c2f52",
-      "build_timestamp": "2026-11-04T18:59:04Z",
-      "prerelease": true,
-      "commit_sha": "4d844d8bde65d7e17422cae2c0e8c96cb955c4e8",
-      "commit_sha_short": "4d844d8b"
     }
   ]
 }
