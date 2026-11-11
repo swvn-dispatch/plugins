@@ -1,0 +1,19 @@
+{
+  "slug": "logo_library",
+  "name": "Logo Library",
+  "description": "Map logos from local external catalogs to Dispatcharr channels",
+  "author": "sethwv",
+  "license": "MIT",
+  "versions": [
+    {
+      "version": "0.0.0-dev-da3df20c",
+      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.0.0-dev-da3df20c/logo-library-0.0.0-dev-da3df20c.zip",
+      "checksum_sha256": "db5dc9124ef3519a90ae4877a117892d98731e01c1210c91cc65d8c1fb932ee0",
+      "build_timestamp": "2026-11-11T21:45:13Z",
+      "prerelease": true,
+      "commit_sha": "da3df20c6cc4b2119ac2cf71ee95795b0e31b4b1",
+      "commit_sha_short": "da3df20c",
+      "min_dispatcharr_version": "v0.34.0"
+    }
+  ]
+}

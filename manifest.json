@@ -80,6 +80,16 @@
       "manifest_url": "plugins/source_switch/manifest.json",
       "icon_url": "plugins/source_switch/logo.png",
       "help_url": "https://github.com/swvn-dispatch/source-switch"
+    },
+    {
+      "slug": "logo_library",
+      "name": "Logo Library",
+      "description": "Map logos from local external catalogs to Dispatcharr channels",
+      "author": "sethwv",
+      "license": "MIT",
+      "manifest_url": "plugins/logo_library/manifest.json",
+      "icon_url": "plugins/logo_library/logo.png",
+      "help_url": "https://github.com/swvn-dispatch/logo-library"
     }
   ]
 }
