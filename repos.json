@@ -31,5 +31,10 @@
     "repo": "swvn-dispatch/source-switch",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png"
+  },
+  {
+    "repo": "swvn-dispatch/logo-library",
+    "plugin_json": "src/plugin.json",
+    "logo": "src/logo.png"
   }
 ]
