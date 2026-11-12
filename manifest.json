@@ -84,11 +84,12 @@
     {
       "slug": "logo_library",
       "name": "Logo Library",
-      "description": "Map logos from local external catalogs to Dispatcharr channels",
+      "description": "Assign channel logos from a catalog (like the tv-logo/tv-logos repo) using manual mappings or group-based automatic matching.",
       "author": "sethwv",
       "license": "MIT",
       "manifest_url": "plugins/logo_library/manifest.json",
       "icon_url": "plugins/logo_library/logo.png",
+      "discord_thread": "https://discord.com/channels/1340492560220684331/1570480168391282718",
       "help_url": "https://github.com/swvn-dispatch/logo-library"
     }
   ]

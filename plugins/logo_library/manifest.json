@@ -1,10 +1,20 @@
 {
   "slug": "logo_library",
   "name": "Logo Library",
-  "description": "Map logos from local external catalogs to Dispatcharr channels",
+  "description": "Assign channel logos from a catalog (like the tv-logo/tv-logos repo) using manual mappings or group-based automatic matching.",
   "author": "sethwv",
   "license": "MIT",
   "versions": [
+    {
+      "version": "0.0.0-dev-285b5cf4",
+      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.0.0-dev-285b5cf4/logo-library-0.0.0-dev-285b5cf4.zip",
+      "checksum_sha256": "16d01fcc9221d05dd8809f1eef50d603ffa54e9f1d85ac08a09449fa9685fc6e",
+      "build_timestamp": "2026-11-12T16:50:27Z",
+      "prerelease": true,
+      "commit_sha": "285b5cf4fc126bea217d3271091d7c9269e4c884",
+      "commit_sha_short": "285b5cf4",
+      "min_dispatcharr_version": "v0.34.0"
+    },
     {
       "version": "0.0.0-dev-2c17ace5",
       "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.0.0-dev-2c17ace5/logo-library-0.0.0-dev-2c17ace5.zip",
@@ -13,16 +23,6 @@
       "prerelease": true,
       "commit_sha": "2c17ace540eaada078fee6db152c0c0842af1d8d",
       "commit_sha_short": "2c17ace5",
-      "min_dispatcharr_version": "v0.34.0"
-    },
-    {
-      "version": "0.0.0-dev-8301b2a3",
-      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.0.0-dev-8301b2a3/logo-library-0.0.0-dev-8301b2a3.zip",
-      "checksum_sha256": "71c42ba49032456b1e85d8fe13760df305702c4f23322fbe0d1338087dd1472d",
-      "build_timestamp": "2026-11-12T14:21:08Z",
-      "prerelease": true,
-      "commit_sha": "8301b2a3df68b8c45297f6c1630dc69821c84b3d",
-      "commit_sha_short": "8301b2a3",
       "min_dispatcharr_version": "v0.34.0"
     }
   ]
