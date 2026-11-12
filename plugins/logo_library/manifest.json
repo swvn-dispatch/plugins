@@ -6,6 +6,16 @@
   "license": "MIT",
   "versions": [
     {
+      "version": "0.0.0-dev-2c17ace5",
+      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.0.0-dev-2c17ace5/logo-library-0.0.0-dev-2c17ace5.zip",
+      "checksum_sha256": "98044d752a58c3b7bc7bf7f39dfc4427596f461c3f6a80ebac009fdfb5b78485",
+      "build_timestamp": "2026-11-12T14:26:11Z",
+      "prerelease": true,
+      "commit_sha": "2c17ace540eaada078fee6db152c0c0842af1d8d",
+      "commit_sha_short": "2c17ace5",
+      "min_dispatcharr_version": "v0.34.0"
+    },
+    {
       "version": "0.0.0-dev-8301b2a3",
       "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.0.0-dev-8301b2a3/logo-library-0.0.0-dev-8301b2a3.zip",
       "checksum_sha256": "71c42ba49032456b1e85d8fe13760df305702c4f23322fbe0d1338087dd1472d",
@@ -13,16 +23,6 @@
       "prerelease": true,
       "commit_sha": "8301b2a3df68b8c45297f6c1630dc69821c84b3d",
       "commit_sha_short": "8301b2a3",
-      "min_dispatcharr_version": "v0.34.0"
-    },
-    {
-      "version": "0.0.0-dev-fa315245",
-      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.0.0-dev-fa315245/logo-library-0.0.0-dev-fa315245.zip",
-      "checksum_sha256": "94d4561c0a3d7b3507cae092ac70398b9e09c19812a43cb6c588bd9018d50c60",
-      "build_timestamp": "2026-11-12T14:11:57Z",
-      "prerelease": true,
-      "commit_sha": "fa315245f0a318e35f6eb71d555af8af99c4dff2",
-      "commit_sha_short": "fa315245",
       "min_dispatcharr_version": "v0.34.0"
     }
   ]
