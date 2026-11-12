@@ -87,8 +87,13 @@
       "description": "Assign channel logos from a catalog (like the tv-logo/tv-logos repo) using manual mappings or group-based automatic matching.",
       "author": "sethwv",
       "license": "MIT",
+      "latest_version": "0.1.0",
+      "last_updated": "2026-11-12T16:56:30Z",
       "manifest_url": "plugins/logo_library/manifest.json",
+      "latest_url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.0/logo-library-0.1.0.zip",
+      "latest_sha256": "4334d749cf7839aed7fbf3e836005d8b53f3274504a700cac9634200650c22c1",
       "icon_url": "plugins/logo_library/logo.png",
+      "min_dispatcharr_version": "v0.34.0",
       "discord_thread": "https://discord.com/channels/1340492560220684331/1570480168391282718",
       "help_url": "https://github.com/swvn-dispatch/logo-library"
     }
