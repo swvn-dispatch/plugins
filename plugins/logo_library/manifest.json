@@ -4,8 +4,17 @@
   "description": "Assign channel logos from a catalog (like the tv-logo/tv-logos repo) using manual mappings or group-based automatic matching.",
   "author": "sethwv",
   "license": "MIT",
-  "latest_version": "0.1.0",
+  "latest_version": "0.1.1",
   "versions": [
+    {
+      "version": "0.1.1",
+      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.1/logo-library-0.1.1.zip",
+      "checksum_sha256": "3495fa3f62032631814d12e03e36271af62258a47136861063090cc641dbd0bb",
+      "build_timestamp": "2026-11-13T17:58:56Z",
+      "commit_sha": "c51a296f8606902ebb5cc65420eb0c1292ddc698",
+      "commit_sha_short": "c51a296f",
+      "min_dispatcharr_version": "v0.34.0"
+    },
     {
       "version": "0.1.0",
       "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.0/logo-library-0.1.0.zip",
@@ -37,12 +46,12 @@
     }
   ],
   "latest": {
-    "version": "0.1.0",
-    "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.0/logo-library-0.1.0.zip",
-    "checksum_sha256": "e535f1ff94e7e24de6b20a46d3795b8a9dcad29e54508ae98f8a2754ebc884fc",
-    "build_timestamp": "2026-11-12T17:37:41Z",
-    "commit_sha": "a2a120720397cd9a718ed008152f2aa4e9ee678b",
-    "commit_sha_short": "a2a12072",
+    "version": "0.1.1",
+    "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.1/logo-library-0.1.1.zip",
+    "checksum_sha256": "3495fa3f62032631814d12e03e36271af62258a47136861063090cc641dbd0bb",
+    "build_timestamp": "2026-11-13T17:58:56Z",
+    "commit_sha": "c51a296f8606902ebb5cc65420eb0c1292ddc698",
+    "commit_sha_short": "c51a296f",
     "min_dispatcharr_version": "v0.34.0"
   }
 }
