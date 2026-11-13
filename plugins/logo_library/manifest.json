@@ -4,17 +4,8 @@
   "description": "Assign channel logos from a catalog (like the tv-logo/tv-logos repo) using manual mappings or group-based automatic matching.",
   "author": "sethwv",
   "license": "MIT",
-  "latest_version": "0.1.1",
+  "latest_version": "0.1.0",
   "versions": [
-    {
-      "version": "0.1.1",
-      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.1/logo-library-0.1.1.zip",
-      "checksum_sha256": "3495fa3f62032631814d12e03e36271af62258a47136861063090cc641dbd0bb",
-      "build_timestamp": "2026-11-13T17:58:56Z",
-      "commit_sha": "c51a296f8606902ebb5cc65420eb0c1292ddc698",
-      "commit_sha_short": "c51a296f",
-      "min_dispatcharr_version": "v0.34.0"
-    },
     {
       "version": "0.1.0",
       "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.0/logo-library-0.1.0.zip",
@@ -25,33 +16,33 @@
       "min_dispatcharr_version": "v0.34.0"
     },
     {
-      "version": "0.1.0-dev-c8f414d0",
-      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.0-dev-c8f414d0/logo-library-0.1.0-dev-c8f414d0.zip",
-      "checksum_sha256": "e49e05197a4cc11f76ef30e02a4a2a75726a3e4c718a2e314658c04589f42e32",
-      "build_timestamp": "2026-11-12T18:23:58Z",
+      "version": "0.1.1-dev-f6d68312",
+      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.1-dev-f6d68312/logo-library-0.1.1-dev-f6d68312.zip",
+      "checksum_sha256": "dd139b7310a6bd3a44651d26857eb5cd33fe3a90ac8e5440cd9aaf1fda2087c7",
+      "build_timestamp": "2026-11-13T18:06:39Z",
       "prerelease": true,
-      "commit_sha": "c8f414d0127b8e95642141a77611a56c7969a4a8",
-      "commit_sha_short": "c8f414d0",
+      "commit_sha": "f6d68312599d914327d38cdfa95d50a7b1d632ee",
+      "commit_sha_short": "f6d68312",
       "min_dispatcharr_version": "v0.34.0"
     },
     {
-      "version": "0.1.0-dev-c9e2898c",
-      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.0-dev-c9e2898c/logo-library-0.1.0-dev-c9e2898c.zip",
-      "checksum_sha256": "81ece2a8170f9909649ff066cdf18434510f48da96bd525a486880bc14d0f6d7",
-      "build_timestamp": "2026-11-12T18:13:14Z",
+      "version": "0.1.1-dev-c51a296f",
+      "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.1-dev-c51a296f/logo-library-0.1.1-dev-c51a296f.zip",
+      "checksum_sha256": "6e44716dff1935737a4fbcd2d4ca697c8b24139087e882731673c5f613cf4309",
+      "build_timestamp": "2026-11-13T18:05:44Z",
       "prerelease": true,
-      "commit_sha": "c9e2898cca2fa3d7593a8db808673c74411a9484",
-      "commit_sha_short": "c9e2898c",
+      "commit_sha": "c51a296f8606902ebb5cc65420eb0c1292ddc698",
+      "commit_sha_short": "c51a296f",
       "min_dispatcharr_version": "v0.34.0"
     }
   ],
   "latest": {
-    "version": "0.1.1",
-    "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.1/logo-library-0.1.1.zip",
-    "checksum_sha256": "3495fa3f62032631814d12e03e36271af62258a47136861063090cc641dbd0bb",
-    "build_timestamp": "2026-11-13T17:58:56Z",
-    "commit_sha": "c51a296f8606902ebb5cc65420eb0c1292ddc698",
-    "commit_sha_short": "c51a296f",
+    "version": "0.1.0",
+    "url": "https://github.com/swvn-dispatch/logo-library/releases/download/v0.1.0/logo-library-0.1.0.zip",
+    "checksum_sha256": "e535f1ff94e7e24de6b20a46d3795b8a9dcad29e54508ae98f8a2754ebc884fc",
+    "build_timestamp": "2026-11-12T17:37:41Z",
+    "commit_sha": "a2a120720397cd9a718ed008152f2aa4e9ee678b",
+    "commit_sha_short": "a2a12072",
     "min_dispatcharr_version": "v0.34.0"
   }
 }
