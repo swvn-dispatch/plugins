@@ -1,6 +1,6 @@
-**Logo Library v0.1.0**
+**Logo Library v0.1.1**
 
-- Assign channel logos from the tv-logos catalog manually or match them automatically by group.
-- Narrow matches with catalog folders and filters, and optionally use fuzzy matching.
-- Protect existing logos and manual mappings, and exclude channels from automatic matching.
-- Review matching results and refresh the catalog for new logos.
+- Schedule automatic matching and catalog refresh independently.
+- Prefer HD logos or use the new standard-logo default.
+- Review grouped match results and candidate logos for skipped matches.
+- Use generic network logos as a default fallback for unmatched stations.

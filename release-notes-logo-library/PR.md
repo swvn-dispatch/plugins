@@ -1,3 +1,3 @@
-Release Logo Library v0.1.0
+Release Logo Library v0.1.1
 
-This initial release adds manual and group-based automatic channel logo assignment from the tv-logos catalog, with matching controls, filters, and results to help users manage their Dispatcharr logos.
+This release adds independent schedules for matching and catalog refresh, HD logo preferences, and clearer match reports. It also updates matching defaults and improves variant selection and settings guidance.
