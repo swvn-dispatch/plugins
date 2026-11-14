@@ -1,6 +1,5 @@
-**Logo Library v0.1.1**
+**Logo Library v0.1.2**
 
-- Schedule automatic matching and catalog refresh independently.
-- Prefer HD logos or use the new standard-logo default.
-- Review grouped match results and candidate logos for skipped matches.
-- Use generic network logos as a default fallback for unmatched stations.
+- Prefer logos from catalog paths based on channel-name patterns.
+- Ignore channels by name pattern during automatic matching.
+- Review the relevant settings and version information in action results.

@@ -1,3 +1,3 @@
-Release Logo Library v0.1.1
+Release Logo Library v0.1.2
 
-This release adds independent schedules for matching and catalog refresh, HD logo preferences, and clearer match reports. It also updates matching defaults and improves variant selection and settings guidance.
+This release adds channel-name patterns for preferred logo paths and automatic matching exclusions. It also makes action results easier to review with relevant settings and version information.
