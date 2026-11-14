@@ -7,22 +7,22 @@
 		},
 
 		// --- ACTIVE PLUGINS ---
-		// {
-		// 	"name": "🔥 Prometheus Exporter",
-		// 	"path": "../dispatcharr-exporter"
-		// },
-		// {
-		// 	"name": "🖥️ Multiview",
-		// 	"path": "../multiview"
-		// },
-		// {
-		// 	"name": "🧼 Embyfin Cleanup",
-		// 	"path": "../emby-stream-cleanup"
-		// },
-		// {
-		// 	"name": "♻️ Source Switch",
-		// 	"path": "../source-switch"
-		// },
+		{
+			"name": "🔥 Prometheus Exporter",
+			"path": "../dispatcharr-exporter"
+		},
+		{
+			"name": "🖥️ Multiview",
+			"path": "../multiview"
+		},
+		{
+			"name": "🧼 Embyfin Cleanup",
+			"path": "../emby-stream-cleanup"
+		},
+		{
+			"name": "♻️ Source Switch",
+			"path": "../source-switch"
+		},
 		{
 			"name": "🖼️ Logo Library",
 			"path": "../logo-library"
@@ -37,9 +37,9 @@
 		// },
 
 		//--- PRIVATE FORKS ---
-		// {
-		// 	"path": "../twitcharr-fork"
-		// },
+		{
+			"path": "../twitcharr-fork"
+		},
 
 		//--- OTHER RELATED ---
 		// {
