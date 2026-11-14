@@ -2,4 +2,4 @@
 
 ### Added
 
-- Added opt-in Packet Slapper speedtest metrics, including recent test status, connection performance, and test-server information. Contributed by HaraldRuppert in [#13](https://github.com/swvn-dispatch/dispatcharr-exporter/pull/13).
+- Added Packet Slapper metrics for download and upload loaded latency and the last scheduled speedtest skipped while someone was watching. Contributed by @write-erase in [#15](https://github.com/swvn-dispatch/dispatcharr-exporter/pull/15).

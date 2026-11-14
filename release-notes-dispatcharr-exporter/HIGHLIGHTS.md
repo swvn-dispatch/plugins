@@ -1,1 +1,1 @@
-- Added optional Packet Slapper speedtest metrics for download, upload, latency, jitter, packet loss, test status, and server details.
+- Monitor Packet Slapper latency during downloads and uploads, and see when a scheduled speedtest was last skipped because someone was watching.

@@ -1,3 +1,3 @@
-feat: add Packet Slapper speedtest metrics
+feat: add Packet Slapper latency and skip metrics
 
-Add optional metrics for Packet Slapper speedtests so operators can monitor recent test outcomes, connection performance, and test-server details alongside Dispatcharr metrics.
+Add Packet Slapper loaded latency and skipped speedtest metrics so operators can monitor connection responsiveness under load and identify tests skipped while someone was watching.
