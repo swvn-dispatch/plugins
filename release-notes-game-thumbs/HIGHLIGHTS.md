@@ -1,2 +1,3 @@
-- Render league branding as a team in thumbnails, matchup logos, and raw data responses.
-- Add up to four image badges, with ranking badges and optional corner placement. (#161 by @lpukatch)
+- Find cricket series and teams listed in ESPN's daily scores.
+- Restore TheSportsDB team and athlete lookups.
+- Improve matchup fallback images and AHL logo reliability.

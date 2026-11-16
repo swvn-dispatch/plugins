@@ -1,3 +1,3 @@
-feat: add league teams and enhanced badge overlays
+Release v2.5.0
 
-League branding can now be rendered as a team across image and raw data endpoints, while badge overlays support rankings, multiple badges, and corner placement. WNBA league-team images now use a contrasting background for clearer branding.
+Add discovery of cricket series and teams from ESPN's daily scores, restore TheSportsDB lookups, and improve fallback image and AHL logo reliability.
