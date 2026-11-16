@@ -329,7 +329,8 @@ jobs:
         continue-on-error: true
         with:
           output: _analysis/sarif-results
-          upload: false
+          upload: never
+          upload-database: false
 
       - name: Parse CodeQL findings
         id: codeql-status
