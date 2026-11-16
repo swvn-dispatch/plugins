@@ -1,8 +1,8 @@
 name: Update Plugins Repo
 
 # Submits tracked plugin releases to the community registry as external plugins.
-# Stable releases arrive through repository_dispatch. A manual dispatch selects a
-# tracked plugin and submits its current dev prerelease.
+# Stable releases arrive through repository_dispatch. Manual runs can select a
+# stable or dev release and optionally skip the local CodeQL preflight.
 
 on:
   repository_dispatch:
@@ -13,6 +13,18 @@ on:
         description: 'Tracked plugin slug or source repository short name'
         required: true
         type: string
+      release:
+        description: 'Release to submit'
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - latest
+      skip_codeql:
+        description: 'Skip the pre-submission CodeQL scan'
+        type: boolean
+        default: false
 
 concurrency:
   group: update-plugins-repo-${{ github.event.client_payload.repo || inputs.plugin }}
@@ -116,8 +128,9 @@ jobs:
         if: steps.config.outputs.slug != ''
         env:
           REPO: ${{ steps.source.outputs.repo }}
+          RELEASE_CHOICE: ${{ inputs.release }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$RELEASE_CHOICE" = "dev" ]; then
             RELEASE=$(gh api "repos/$REPO/releases?per_page=100" --jq '
               [ .[]
                 | select(.prerelease == true and .draft == false)
@@ -262,6 +275,90 @@ jobs:
             echo "existing_pr_branch=$(echo "$OPEN_PR_JSON" | jq -r '.headRefName')" >> "$GITHUB_OUTPUT"
           fi
           echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve upstream CodeQL revision
+        id: codeql-revision
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql)
+        run: |
+          SHA=$(gh api repos/Dispatcharr/Plugins/commits/main --jq .sha)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout upstream CodeQL and pluginctl
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql)
+        uses: actions/checkout@v4
+        with:
+          repository: Dispatcharr/Plugins
+          ref: ${{ steps.codeql-revision.outputs.sha }}
+          path: _trusted
+          persist-credentials: false
+          sparse-checkout: |
+            .github/codeql
+            .github/pluginctl
+          sparse-checkout-cone-mode: false
+
+      - name: Stage release for CodeQL
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql)
+        env:
+          SLUG: ${{ steps.config.outputs.slug }}
+        run: |
+          python3 .github/scripts/codeql_preflight.py stage /tmp/extract /tmp/registry-plugin/plugin.json _analysis "$SLUG"
+          cp -R _trusted/.github/codeql .github/codeql
+
+      - name: Detect CodeQL languages
+        id: codeql-languages
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql)
+        working-directory: _analysis
+        env:
+          PYTHONPATH: ${{ github.workspace }}/_trusted/.github/pluginctl/src
+        run: python3 -m pluginctl detect-langs
+
+      - name: Initialize CodeQL
+        id: codeql-init
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql) && steps.codeql-languages.outputs.found == 'true'
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ steps.codeql-languages.outputs.languages }}
+          build-mode: none
+          source-root: _analysis
+          config-file: _trusted/.github/codeql/codeql-config.yml
+
+      - name: Analyze release with CodeQL
+        id: codeql-analyze
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql) && steps.codeql-languages.outputs.found == 'true'
+        uses: github/codeql-action/analyze@v4
+        continue-on-error: true
+        with:
+          output: _analysis/sarif-results
+          upload: false
+
+      - name: Parse CodeQL findings
+        id: codeql-status
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql) && (steps.codeql-languages.outputs.found == 'false' || steps.codeql-analyze.outcome != 'skipped')
+        working-directory: _analysis
+        env:
+          PYTHONPATH: ${{ github.workspace }}/_trusted/.github/pluginctl/src
+          SLUG: ${{ steps.config.outputs.slug }}
+          REVISION: ${{ steps.codeql-revision.outputs.sha }}
+          ANALYZE_OUTCOME: ${{ steps.codeql-analyze.outcome }}
+          FOUND: ${{ steps.codeql-languages.outputs.found }}
+          LANGUAGES: ${{ steps.codeql-languages.outputs.languages }}
+          UNSCANNED: ${{ steps.codeql-languages.outputs.unscanned_langs }}
+        run: |
+          python3 ../.github/scripts/codeql_preflight.py check-sarif sarif-results "$SLUG" "$FOUND" "$ANALYZE_OUTCOME"
+          MATRIX=$(jq -cn --arg slug "$SLUG" '[$slug]')
+          python3 -m pluginctl sarif --results-dir sarif-results --repo Dispatcharr/Plugins \
+            --sha "$REVISION" --matrix "$MATRIX" --analyze-outcome "$ANALYZE_OUTCOME" \
+            --found "$FOUND" --languages "$LANGUAGES" --unscanned-langs "$UNSCANNED"
+
+      - name: Enforce CodeQL preflight
+        if: steps.check.outputs.skip == 'false' && !(github.event_name == 'workflow_dispatch' && inputs.skip_codeql)
+        env:
+          STATUS: ${{ steps.codeql-status.outputs.codeql_status }}
+        run: |
+          case "$STATUS" in
+            success|skipped) ;;
+            *) echo "::error::CodeQL preflight failed or did not produce a status."; exit 1 ;;
+          esac
 
       - name: Generate release notes
         if: steps.check.outputs.skip == 'false'
@@ -415,6 +512,13 @@ jobs:
           SKIP: ${{ steps.check.outputs.skip }}
           SOURCE_REPO: ${{ steps.source.outputs.repo }}
           OPTED_OUT: ${{ steps.config.outputs.opted_out }}
+          CODEQL_BYPASS: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_codeql }}
+          CODEQL_STATUS: ${{ steps.codeql-status.outputs.codeql_status }}
+          CODEQL_SHA: ${{ steps.codeql-revision.outputs.sha }}
+          CODEQL_UNSCANNED: ${{ steps.codeql-status.outputs.codeql_unscanned_langs }}
+          CODEQL_SANDBOX: ${{ steps.codeql-status.outputs.codeql_sandbox_bypass_detected }}
+          CODEQL_CAPABILITY: ${{ steps.codeql-status.outputs.codeql_capability_contract_detected }}
+          CODEQL_SUPPRESSED: ${{ steps.codeql-status.outputs.codeql_suppressed }}
         run: |
           if [ -n "$PR_URL" ]; then
             echo "## Plugin PR ${PR_ACTION^}" >> "$GITHUB_STEP_SUMMARY"
@@ -435,4 +539,21 @@ jobs:
           else
             echo "## Failed" >> "$GITHUB_STEP_SUMMARY"
             echo "Check the workflow logs for the failure details." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "$SKIP" = "false" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "## CodeQL preflight" >> "$GITHUB_STEP_SUMMARY"
+            if [ "$CODEQL_BYPASS" = "true" ]; then
+              echo "**Intentionally skipped** by manual dispatch. Upstream checks still apply." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "Status: **${CODEQL_STATUS:-failed or not completed}**" >> "$GITHUB_STEP_SUMMARY"
+              echo "Upstream revision: \`${CODEQL_SHA:-unavailable}\`" >> "$GITHUB_STEP_SUMMARY"
+              echo "Unscanned languages: ${CODEQL_UNSCANNED:-none}" >> "$GITHUB_STEP_SUMMARY"
+              echo "Review findings: sandbox ${CODEQL_SANDBOX:-0}, capability ${CODEQL_CAPABILITY:-0}, suppressed ${CODEQL_SUPPRESSED:-0}." >> "$GITHUB_STEP_SUMMARY"
+              for file in _analysis/codeql-*-findings.md _analysis/codeql-findings.md; do
+                [ -f "$file" ] || continue
+                printf '\n### %s\n\n' "$(basename "$file" .md)" >> "$GITHUB_STEP_SUMMARY"
+                cat "$file" >> "$GITHUB_STEP_SUMMARY"
+              done
+            fi
           fi

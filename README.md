@@ -108,7 +108,9 @@ If a plugin has no stable releases yet, all `latest_*` fields are omitted from t
 
 `Update Plugins Repo` submits tracked releases to the Dispatcharr community registry as [external plugins](https://github.com/Dispatcharr/Plugins/blob/main/CONTRIBUTING.md#external-plugin). Its generated registry directory contains only `plugin.json` and `logo.png`; source files and READMEs are removed during the first migrated submission.
 
-A `plugin-updated` repository dispatch submits the latest stable release. To submit a dev prerelease deliberately, run the workflow from the Actions tab and enter the tracked plugin slug or source repository short name. The workflow selects the newest versioned dev prerelease and verifies that its tag, ZIP, and embedded version agree on `<registry-stable-version>-dev-<shortsha>` before opening a PR. Dev artifacts are immutable, and each plugin repository retains its five newest dev releases.
+A `plugin-updated` repository dispatch submits the latest stable release. To submit manually, run the workflow from the Actions tab, enter the tracked plugin slug or source repository short name, and choose `latest` stable or `dev` (the default). The workflow selects the newest versioned dev prerelease and verifies that its tag, ZIP, and embedded version agree on `<registry-stable-version>-dev-<shortsha>` before opening a PR. Dev artifacts are immutable, and each plugin repository retains its five newest dev releases.
+
+Before submitting, the workflow scans the release ZIP with the current Dispatcharr registry CodeQL queries and manifest-aware policy. Blocking findings stop submission; sandbox and capability findings are reported for upstream review. Manual runs can explicitly select `skip_codeql` to bypass this preflight, which is recorded in the job summary. Automatic submissions always run the preflight, and the registry still runs its own checks after submission. ZIPs scanned by the preflight must contain `plugin.json` at their root, matching the registry's runtime-manifest handling.
 
 ### Configuration files
 
