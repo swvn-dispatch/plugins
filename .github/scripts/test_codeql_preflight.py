@@ -32,11 +32,15 @@ class StageTests(unittest.TestCase):
         self.assertEqual(json.loads((plugin / ".dispatcharr-runtime-manifest.json").read_text())["manifest_version"], 1)
         self.assertTrue((plugin / "main.py").is_file())
 
-    def test_rejects_nested_manifest_and_unsafe_slug(self):
+    def test_stages_nested_manifest_without_runtime_sidecar(self):
         (self.extracted / "nested").mkdir()
         (self.extracted / "nested/plugin.json").write_text("{}")
-        with self.assertRaisesRegex(ValueError, "root"):
-            preflight.stage(self.extracted, self.catalog, self.root / "analysis", "test")
+        preflight.stage(self.extracted, self.catalog, self.root / "analysis", "test")
+        plugin = self.root / "analysis/plugins/test"
+        self.assertTrue((plugin / "nested/plugin.json").is_file())
+        self.assertFalse((plugin / ".dispatcharr-runtime-manifest.json").exists())
+
+    def test_rejects_unsafe_slug(self):
         with self.assertRaisesRegex(ValueError, "slug"):
             preflight.stage(self.extracted, self.catalog, self.root / "analysis", "../test")
 

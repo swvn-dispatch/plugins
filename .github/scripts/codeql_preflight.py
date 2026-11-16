@@ -11,14 +11,13 @@ def stage(extracted: Path, catalog: Path, root: Path, slug: str) -> None:
     if not slug or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789-" for c in slug):
         raise ValueError("Invalid plugin slug")
     manifest = extracted / "plugin.json"
-    if not manifest.is_file():
-        raise ValueError("Release ZIP must contain plugin.json at its root for the upstream CodeQL scan")
     if any(path.is_symlink() for path in extracted.rglob("*")):
         raise ValueError("Release ZIP must not contain symbolic links")
     destination = root / "plugins" / slug
     destination.mkdir(parents=True, exist_ok=False)
     shutil.copytree(extracted, destination, dirs_exist_ok=True)
-    shutil.copyfile(manifest, destination / ".dispatcharr-runtime-manifest.json")
+    if manifest.is_file():
+        shutil.copyfile(manifest, destination / ".dispatcharr-runtime-manifest.json")
     shutil.copyfile(catalog, destination / "plugin.json")
 
 
