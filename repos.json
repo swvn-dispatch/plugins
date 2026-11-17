@@ -5,18 +5,6 @@
     "logo": "src/logo.png"
   },
   {
-    "repo": "swvn-dispatch/embyfin-stream-cleanup",
-    "plugin_json": "src/plugin.json",
-    "logo": "src/logo.png",
-    "private": true
-  },
-  {
-    "repo": "swvn-dispatch/disp-ldap",
-    "plugin_json": "src/plugin.json",
-    "logo": "src/logo.png",
-    "private": true
-  },
-  {
     "repo": "swvn-dispatch/dispatcharr-multiview",
     "plugin_json": "src/plugin.json",
     "logo": "src/logo.png"
