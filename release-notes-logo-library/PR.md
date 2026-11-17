@@ -1,3 +1,3 @@
-Release Logo Library v0.1.2
+Release Logo Library v0.2.0
 
-This release adds channel-name patterns for preferred logo paths and automatic matching exclusions. It also makes action results easier to review with relevant settings and version information.
+This release adds channel name cleanup and a way to prepare manual mappings from skipped Auto Match results. It also improves regional logo matching, refreshes choices after updates, and makes matching settings and results easier to review.

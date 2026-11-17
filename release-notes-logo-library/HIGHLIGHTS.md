@@ -1,5 +1,6 @@
-**Logo Library v0.1.2**
+**Logo Library v0.2.0**
 
-- Prefer logos from catalog paths based on channel-name patterns.
-- Ignore channels by name pattern during automatic matching.
-- Review the relevant settings and version information in action results.
+- Clean up channel name prefixes, suffixes, or patterns before Auto Match.
+- Create manual mapping rows for channels skipped or failed by Auto Match.
+- Match more regional logos, local stations, and numbered channels.
+- See updated catalog choices and bulk settings changes without manually reloading the plugin.

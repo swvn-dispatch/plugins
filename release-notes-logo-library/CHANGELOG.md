@@ -2,10 +2,15 @@
 
 ### Added
 
-- Prefer catalog paths for Auto Match based on channel-name patterns, with fallback to the normal search when no usable match is found.
-- Ignore channels during Auto Match using name patterns, without preventing explicit Manual Match.
-- Include the plugin and Dispatcharr versions in action results, including the build timestamp for development versions when available.
+- Configure ordered prefix, suffix, or regex cleanup rules for channel names before Auto Match. The first matching rule applies; existing prefix settings are preserved.
+- Create blank manual mapping rows for skipped and failed channels from the latest Auto Match. Existing mappings are preserved; blank rows block Auto Match until completed or removed.
 
 ### Changed
 
-- Show manual mapping definitions in Manual Match results instead of Auto Match settings. Auto Match results include channel hints and ignore patterns.
+- Improve TV Logos matching across more regions, including local station call signs, generic network fallbacks, and numbered channel names.
+- Refresh available choices after catalog updates and refresh settings after bulk mapping or ignore actions.
+- Clarify advanced Auto Match settings and show cleanup rules in Auto Match results.
+
+### Fixed
+
+- Include catalog filters in Manual Match results.
