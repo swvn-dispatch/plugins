@@ -6,6 +6,16 @@
   "license": "MIT",
   "versions": [
     {
+      "version": "0.0.0-dev-4f2ed6c9",
+      "url": "https://github.com/swvn-dispatch/source-switch/releases/download/v0.0.0-dev-4f2ed6c9/source-switch-0.0.0-dev-4f2ed6c9.zip",
+      "checksum_sha256": "d29c1450d4ad46fedba0b088f64d3edf600aa763f625c624de749e050a9319fd",
+      "build_timestamp": "2026-11-24T20:29:59Z",
+      "prerelease": true,
+      "commit_sha": "4f2ed6c96f3fff09d3906ebd53d44e1d2d56cdf9",
+      "commit_sha_short": "4f2ed6c9",
+      "min_dispatcharr_version": "v0.34.0"
+    },
+    {
       "version": "0.0.0-dev-64d6589d",
       "url": "https://github.com/swvn-dispatch/source-switch/releases/download/v0.0.0-dev-64d6589d/source-switch-0.0.0-dev-64d6589d.zip",
       "checksum_sha256": "5ed32bb2911bb28f79b51e37ac4cf432386061b9fc36dfbb91340db2824641dd",
@@ -13,16 +23,6 @@
       "prerelease": true,
       "commit_sha": "64d6589d519e569a8e37c83c27ef6bb52960e8fb",
       "commit_sha_short": "64d6589d",
-      "min_dispatcharr_version": "v0.34.0"
-    },
-    {
-      "version": "0.0.0-dev-6a5023cd",
-      "url": "https://github.com/swvn-dispatch/source-switch/releases/download/v0.0.0-dev-6a5023cd/source-switch-0.0.0-dev-6a5023cd.zip",
-      "checksum_sha256": "ce646585740aa0b7787f83d979f2b27a92778b34dc0ab6177a3420ae350f0a77",
-      "build_timestamp": "2026-11-24T20:07:18Z",
-      "prerelease": true,
-      "commit_sha": "6a5023cd0133d2a1d33a2d59ef7e8296fafe9a5b",
-      "commit_sha_short": "6a5023cd",
       "min_dispatcharr_version": "v0.34.0"
     }
   ]
